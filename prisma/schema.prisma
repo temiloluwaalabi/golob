@@ -1,0 +1,464 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum FlightClass {
+  BasicEconomy
+  StandardEconomy
+  FirstClass
+  BusinessClass
+  PremiumEconomy
+}
+
+enum UserRole {
+  Administrator
+  Superadmin
+  User
+}
+
+enum UserStaus {
+  Activated
+  Pending
+  Deactivated
+}
+
+enum AgencyStatus {
+  PENDING // Initial status, pending KYC verification
+  APPROVED
+  REJECTED
+}
+
+enum KycDocumentType {
+  BUSINESS_REGISTRATION
+  TAX_CERTIFICATE
+  IDENTITY_PROOF
+  // Add other document types as needed
+}
+
+enum Permission {
+  Read
+  Write
+  Delete
+  Edit
+}
+
+enum ReferralAction {
+  REGISTRATION
+  FLIGHT_BOOKING
+  HOTEL_BOOKING
+  IMPRESSION // Add more actions as needed
+}
+
+model User {
+  id                    String                 @id @default(cuid()) @map("_id")
+  name                  String
+  firstName             String?
+  lastName              String?
+  email                 String                 @unique
+  secondEmail           String?
+  image                 String?
+  phoneNumber           String?
+  address               String?
+  dob                   DateTime?
+  emailVerified         DateTime?
+  hashedPassword        String?
+  terms                 Boolean?               @default(false)
+  Account               Account[]
+  Session               Session[]
+  TwoFactorConfirmation TwoFactorConfirmation?
+  Authenticator         Authenticator[]
+  role                  UserRole               @default(User)
+  isTwoFactorEnabled    Boolean                @default(false)
+  userStatus            UserStaus              @default(Pending)
+  accountVerified       Boolean                @default(false)
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  Affiliate             Affiliate[]
+
+  // @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid()) @map("_id")
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // @@map("accounts")
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid()) @map("_id")
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // @@map("sessions")
+}
+
+model Card {
+  id         String @id @default(cuid()) @map("_id")
+  cardNumber String
+  cardType   String
+  validMonth String
+  validYear  String
+}
+
+model VerificationToken {
+  id      String   @id @default(cuid()) @map("_id")
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+model PasswordResetToken {
+  id      String   @id @default(cuid()) @map("_id")
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+model TwoFactorToken {
+  id      String   @id @default(cuid()) @map("_id")
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+model TwoFactorConfirmation {
+  id String @id @default(cuid()) @map("_id")
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId])
+}
+
+model Authenticator {
+  id                   String  @id @default(cuid()) @map("_id")
+  credentialID         String  @unique
+  userId               String
+  providerAccountId    String
+  credentialPublicKey  String
+  counter              Int
+  credentialDeviceType String
+  credentialBackedUp   Boolean
+  transports           String?
+  user                 User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Agency {
+  id             String        @id @default(cuid()) @map("_id")
+  name           String        @unique // Unique agency name
+  email          String        @unique // Agency contact email
+  password       String
+  phoneNumber    String?
+  website        String?
+  address        String?
+  country        String?
+  description    String?
+  logo           String? // URL to agency logo
+  status         AgencyStatus  @default(PENDING)
+  kycDocuments   KycDocument[]
+  // Add fields for specific services (flights, hotels) if needed
+  flightsEnabled Boolean       @default(false)
+  hotelsEnabled  Boolean       @default(false)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  // user           User
+  BankDetails    BankDetails[]
+  userId         String        @db.ObjectId
+}
+
+model KycDocument {
+  id         String          @id @default(cuid()) @map("_id")
+  agencyId   String
+  agency     Agency          @relation(fields: [agencyId], references: [id])
+  type       KycDocumentType
+  fileUrl    String // URL to the uploaded document
+  verified   Boolean         @default(false)
+  verifiedAt DateTime? // Date and time of verification 
+}
+
+model BankDetails {
+  id            String @id @default(cuid()) @map("_id")
+  agencyId      String
+  agency        Agency @relation(fields: [agencyId], references: [id])
+  accountName   String
+  accountNumber String
+  bankName      String
+  // Add other bank details as needed (e.g., SWIFT code)
+}
+
+model Affiliate {
+  id             String     @id @default(cuid()) @map("_id")
+  referralCode   String     @unique @default(cuid())
+  commissionRate Float      @default(0.05) // Default commission rate (5%)
+  earnings       Float      @default(0)
+  // Add fields for payout details (e.g., PayPal email)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  referrals      Referral[]
+  user           User       @relation(fields: [userId], references: [id])
+  userId         String
+}
+
+model Referral {
+  id               String         @id @default(cuid()) @map("_id")
+  affiliateId      String
+  affiliate        Affiliate      @relation(fields: [affiliateId], references: [id])
+  referredUserId   String // ID of the referred user
+  bookingId        String? // ID of the booking made by the referred user (link to your booking model)
+  action           ReferralAction
+  pointsEarned     Int            @default(0)
+  commissionEarned Float          @default(0)
+  createdAt        DateTime       @default(now())
+}
+
+model Flight {
+  id               String    @id @default(cuid()) @map("_id")
+  deeplink         String?
+  operatingAirline Carrier?  @relation(fields: [carrierId], references: [id])
+  name             String
+  idForDisplay     String?   @unique
+  segments         Segment[]
+  // Policy           Policy[]
+  carrierId        String?
+  departureCountry String
+  arrivalCountry   String
+}
+
+model Segment {
+  id               String       @id @default(cuid()) @map("_id")
+  flight           Flight       @relation(fields: [flightId], references: [id])
+  flightId         String
+  flightNumber     String?
+  cabin            FlightClass? @default(BasicEconomy)
+  departureDate    DateTime
+  departureTime    String? // You might use DateTime here as well, depending on your data format
+  arrivalDate      DateTime
+  arrivalTime      String? // You might use DateTime here as well
+  aircraft         String?
+  operatingCarrier Carrier?     @relation(fields: [carrierId], references: [id])
+  carrierId        String?
+  isSmallestStops  Boolean      @default(false)
+  isFastest        Boolean      @default(false)
+  isCheapest       Boolean      @default(false)
+  totalDuration    Int?
+  legs             Leg[]
+  Price            Price        @relation(fields: [priceId], references: [id])
+  priceId          String
+  layovers         Layover[]
+  Amenity          Amenity[]
+}
+
+model Carrier {
+  id            String        @id @default(cuid()) @map("_id")
+  marketingName String
+  flightNumber  String?
+  images        String[]
+  Segment       Segment[]
+  logo          String
+  Flight        Flight[]
+  callsign      String? // The airline's callsign (e.g., "SPEEDBIRD" for British Airways)
+  country       String? // Country of origin 
+  website       String? // Airline's website URL
+  Amenity       Amenity[]
+  cabins        FlightClass[]
+}
+
+model Leg {
+  id                   String   @id @default(cuid()) @map("_id")
+  duration             Int? // Duration in minutes
+  idForDisplay         String?
+  segment              Segment  @relation(fields: [segmentId], references: [id])
+  originAirportId      String
+  destinationAirportId String
+  originCountry        String
+  destinationCountry   String
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  flightType           String?  @default("day")
+  segmentId            String
+  // Connect Leg to Layover (for incoming flight)
+  incomingLayover      Layover? @relation(name: "incomingFlight", fields: [incomingLayoverId], references: [id])
+  incomingLayoverId    String?
+
+  // Connect Leg to Layover (for outgoing flight)
+  outgoingLayover   Layover?  @relation(name: "outgoingFlight", fields: [outgoingLayoverId], references: [id])
+  outgoingLayoverId String?
+  Luggage           Luggage[]
+}
+
+model Layover {
+  id            String   @id @default(cuid()) @map("_id")
+  airport       Airport  @relation(fields: [airportId], references: [id])
+  airportId     String
+  country       String
+  arrivalTime   String?
+  departureTime String?
+  duration      Int?
+  layoverType   String?
+  Segment       Segment? @relation(fields: [segmentId], references: [id])
+  segmentId     String?
+
+  // Relation to Leg (for incoming flight)
+  outgoingFlight Leg[] @relation(name: "incomingFlight")
+
+  // Relation to Leg (for outgoing flight)
+  incomingFlight Leg[] @relation(name: "outgoingFlight")
+}
+
+model Airport {
+  id          String    @id @default(cuid()) @map("_id")
+  iataCode    String    @unique
+  name        String?
+  city        String?
+  countryCode String?
+  country     String?
+  Layover     Layover[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Price {
+  id String @id @default(cuid()) @map("_id")
+
+  amount   Int
+  currency String
+  Segment  Segment[]
+}
+
+model Luggage {
+  id    String @id @default(cuid()) @map("_id")
+  legId String
+  leg   Leg    @relation(fields: [legId], references: [id])
+
+  // Luggage details:
+  carryOn      String? // e.g., "1 piece, max 8kg" 
+  checked      String? // e.g., "1 bag, max 23kg"
+  personalItem String? // e.g., "1 small backpack or purse"
+  // ... any other luggage fields you need ...
+}
+
+// New model for Amenities
+model Amenity {
+  id        String   @id @default(cuid()) @map("_id")
+  carrierId String?
+  carrier   Carrier? @relation(fields: [carrierId], references: [id])
+  segmentId String?
+  segment   Segment? @relation(fields: [segmentId], references: [id])
+  name      String // e.g., "Inflight Meals", "Wi-Fi", "USB Port"
+  details   String? // e.g., "Available", "Additional Charge", "Power outlet available" 
+}
+
+//hotel
+//airbnb
+//car-rental
+//cleaning.
+
+// // Enhanced Luggage Model
+// model Luggage {
+//   id           String             @id @default(cuid()) @map("_id")
+//   legId        String
+//   leg          Leg                @relation(fields: [legId], references: [id])
+//   // Luggage details (with unique relation names):
+//   carryOn      LuggageAllowance[] @relation(name: "carryOnAllowance")
+//   checked      LuggageAllowance[] @relation(name: "checkedAllowance")
+//   personalItem LuggageAllowance[] @relation(name: "personalItemAllowance")
+
+//   LuggageAllowance LuggageAllowance[]
+// }
+
+// // Model for Luggage Allowance (for carry-on, checked, and personal items)
+// model LuggageAllowance {
+//   id          String  @id @default(cuid()) @map("_id")
+//   luggageId   String
+//   quantity    Int? // Number of pieces allowed 
+//   weight      Int? // Maximum weight per piece (in kg)
+//   dimensions  String? // Dimensions string (e.g., "50*37*25 cm")
+//   description String? // Additional description (e.g., "Must fit under the seat")
+//   Luggage     Luggage @relation(fields: [luggageId], references: [id])
+// }
+
+// New model for Policies
+// model Policy {
+//   id           String             @id @default(cuid()) @map("_id")
+//   // flightId       String
+//   // flight         Flight  @relation(fields: [flightId], references: [id])
+//   flight       Flight             @relation(fields: [flightId], references: [id])
+//   cancellation CancellationPolicy
+//   change       ChangePolicy
+//   flightId     String
+// }
+
+// // Model for Cancellation Policy
+// model CancellationPolicy {
+//   id        String                @id @default(cuid()) @map("_id")
+//   policyId  String
+//   policy    Policy                @relation(fields: [policyId], references: [id])
+//   departure CancellationDetails[] @relation(name: "departureCancellationDetails")
+//   return    CancellationDetails[] @relation(name: "returnCancellationDetails")
+//   agencyFee Int? // Additional fee charged by the agency (e.g., 17.90)
+// }
+
+// // Model for details about cancellation (departure and return)
+// model CancellationDetails {
+//   id                   String             @id @default(cuid()) @map("_id")
+//   cancellationPolicyId String
+//   cancellationPolicy   CancellationPolicy @relation(fields: [cancellationPolicyId], references: [id])
+//   hoursBeforeDeparture Int?
+//   fee                  Float
+//   additionalInfo       String? // Example: "Non-refundable. Tax may be refundable"
+
+// }
+
+// // Model for Change Policy
+// model ChangePolicy {
+//   id        String          @id @default(cuid()) @map("_id")
+//   policyId  String
+//   policy    Policy          @relation(fields: [policyId], references: [id])
+//   departure ChangeDetails[] 
+//   return    ChangeDetails[]
+//   agencyFee Float?
+// }
+
+// // Model for details about changes (departure and return)
+// model ChangeDetails {
+//   id                   String       @id @default(cuid()) @map("_id")
+//   changePolicyId       String
+//   changePolicy         ChangePolicy @relation(fields: [changePolicyId], references: [id])
+//   hoursBeforeDeparture Int?
+//   fee                  Float
+//   firstChangeFree      Boolean      @default(false)
+//   additionalInfo       String?
+// }

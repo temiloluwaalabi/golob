@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .text-large {
+    @apply font-bold  text-4xl;
+  }
+
+  .text-14_medium {
+    @apply text-sm font-medium;
+  }
+  .text-20_semibold {
+    @apply text-xl font-semibold font-mont;
+  }
+
+  .text-45_gothic {
+    @apply text-[45px] font-gothicExtended font-medium;
+  }
+  .text-80_gothic {
+    @apply text-[80px] font-gothicExtended font-bold tracking-widest;
+  }
+}

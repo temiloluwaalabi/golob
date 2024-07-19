@@ -1,0 +1,186 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url("../styles//theme.css");
+
+@layer base {
+  :root {
+    /* For rgb(255 255 255 / <alpha-value>) = #ffffff */
+    --gray-0: 255 255 255;
+    /* For rgb(250 250 250 / <alpha-value>) = #fafafa */
+    --gray-50: 250 250 250;
+    /* For rgb(241 241 241 / <alpha-value>) = #f1f1f1 */
+    --gray-100: 241 241 241;
+    /* For rgb(227 227 227 / <alpha-value>) = #e3e3e3 */
+    --gray-200: 227 227 227;
+    /* For rgb(223 223 223 / <alpha-value>) = #dfdfdf */
+    --gray-300: 223 223 223;
+    /* For rgb(146 146 146 / <alpha-value>) = #929292 */
+    --gray-400: 146 146 146;
+    /* For rgb(102 102 102 / <alpha-value>) = #666666 */
+    --gray-500: 102 102 102;
+    /* For rgb(72 72 72 / <alpha-value>) = #484848 */
+    --gray-600: 72 72 72;
+    /* For rgb(51 51 51 / <alpha-value>) = #333333 */
+    --gray-700: 51 51 51;
+    /* For rgb(34 34 34 / <alpha-value>) = #222222 */
+    --gray-800: 34 34 34;
+    /* For rgb(17 17 17 / <alpha-value>) = #111111 */
+    --gray-900: 17 17 17;
+    /* For rgb(0 0 0 / <alpha-value>) = #000000 */
+    --gray-1000: 0 0 0;
+
+    /* For rgb(226.5 19.61 60 / <alpha-value>) = #858EAD */
+    --light-400: 226.5, 19.61%, 60%;
+    /* For rgb(226.5 19.61 60 / <alpha-value>) = #7B8EC8 */
+    --light-500: 225, 41%, 63%;
+    /* For rgb(226.5 19.61 60 / <alpha-value>) = #DCE3F1 */
+    --light-600: 220, 43%, 90%;
+    /* For rgb(226.5 19.61 60 / <alpha-value>) = #FDFDFD */
+    --light-700: 0, 0%, 99.22%;
+    /* For rgb(210, 22%, 96% / <alpha-value>) = #F4F6F8 */
+    --light-800: 210, 22%, 96%;
+    /* For rgb(255 255 255 / <alpha-value>) = #ffffff */
+    --light-900: 0, 0%, 100%;
+
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 159.43, 44.3%, 69.02%;
+    --primary-foreground: 210 40% 98%;
+
+    --salmon: 1.92, 100%, 75.49%;
+    --blackish-green: 120, 33.33%, 10%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply flex min-h-full flex-col overflow-x-hidden text-sm text-gray-600 dark:bg-gray-50 scroll-smooth;
+  }
+}
+@layer utilities {
+  .flex-center {
+    @apply flex justify-center items-center;
+  }
+
+  .flex-between {
+    @apply flex justify-between items-center;
+  }
+
+  .flex-start {
+    @apply flex justify-start items-center;
+  }
+  .no-focus {
+    @apply focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0 !important;
+  }
+
+  .btn {
+    @apply bg-light-800 dark:bg-dark-300 !important;
+  }
+
+  .btn-secondary {
+    @apply bg-light-800 dark:bg-dark-400 !important;
+  }
+
+  .btn-tertiary {
+    @apply bg-light-700 dark:bg-dark-300 !important;
+  }
+  input::-ms-clear,
+  input::-ms-reveal {
+    @apply hidden;
+  }
+
+  input[type="search"]::-webkit-search-cancel-button {
+    @apply hidden;
+  }
+
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    @apply m-0 appearance-none;
+  }
+
+  input[type="checkbox"]:checked {
+    @apply bg-none;
+  }
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  textarea:-webkit-autofill,
+  textarea:-webkit-autofill:hover,
+  textarea:-webkit-autofill:focus,
+  select:-webkit-autofill,
+  select:-webkit-autofill:hover,
+  select:-webkit-autofill:focus {
+    border: 1px solid transparent;
+    -webkit-text-fill-color: currentColor;
+    -webkit-box-shadow: 0 0 0px 1000px transparent inset;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+}
+.custom-dashed-border {
+  border-width: 2px;
+  border-style: dashed;
+  border-color: black;
+  border-image: linear-gradient(to right, black 33%, rgba(255, 255, 255, 0) 0%)
+    1;
+  border-image-slice: 1;
+}
