@@ -4,10 +4,13 @@ import EyeOffIcon from "@/components/icons/eye-off";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 import { useState } from "react";
 
 interface CustomPasswordInputProps {
   isPending?: boolean;
+  labelClassName?: string;
+  inputClassName?: string;
   field: any;
   label: string;
   placeholder?: string;
@@ -18,11 +21,18 @@ const CustomPasswordInput = ({
   field,
   label,
   placeholder,
+  labelClassName,
+  inputClassName,
 }: CustomPasswordInputProps) => {
   const [showPassword, setShowPassword] = useState(false);
   return (
-    <div className="flex gap-1 items-center p-0 relative bg-white pr-[10px] h-[56px] border rounded-md ">
-      <Label className="absolute top-0 left-0 translate-x-3 mt-[-12px] bg-white px-2 py-1">
+    <div className="flex gap-1 items-center p-0 relative w-full bg-transparent pr-[10px] h-[56px] border rounded-md ">
+      <Label
+        className={cn(
+          "absolute top-0 left-0 translate-x-3 mt-[-12px] bg-white px-2 py-1",
+          labelClassName
+        )}
+      >
         {label}
       </Label>
       <Input

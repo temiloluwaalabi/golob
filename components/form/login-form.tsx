@@ -30,6 +30,18 @@ import { User } from "@prisma/client";
 import AccountModal from "../cards/account-modal";
 import { useCurrentAuthStore } from "@/store/authStore";
 
+export enum FormFieldTypes {
+  INPUT = "input",
+  POPOVER = " popover",
+  TEXTAREA = "textarea",
+  PASSWORD = "inputPassword",
+  PHONE_INPUT = "phoneInput",
+  CHECKBOX = "checkbox",
+  DATE_PICKER = "datePicker",
+  SELECT = "select",
+  SKELETON = "skeleton",
+}
+
 const LoginForm = () => {
   const searchParams = useSearchParams();
   const [error, setError] = useState("");

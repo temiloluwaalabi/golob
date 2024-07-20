@@ -33,6 +33,11 @@ enum UserStaus {
   Deactivated
 }
 
+enum AccountType {
+  Personal
+  Agency
+}
+
 enum AgencyStatus {
   PENDING // Initial status, pending KYC verification
   APPROVED
@@ -85,6 +90,7 @@ model User {
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @updatedAt
   Affiliate             Affiliate[]
+  accountType           AccountType            @default(Personal)
 
   // @@map("users")
 }
