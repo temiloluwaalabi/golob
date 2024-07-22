@@ -1,6 +1,21 @@
 import { messages } from "@/config/messages";
 import * as z from "zod";
-
+export const FileSchema = z.object({
+  name: z.string(),
+  url: z.string(),
+  size: z.number(),
+  key: z.optional(z.string()),
+});
+export const OTPSchema = z.object({
+  otp: z.coerce
+    .number()
+    .min(1, {
+      message: "Minimum of 1 number is required",
+    })
+    .max(6, {
+      message: "maximum of 6 characters is required",
+    }),
+});
 export const ValidateEmail = z
   .string()
   .min(1, { message: messages.emailIsRequired })
@@ -66,3 +81,14 @@ export const SetupPasswordCSchema = z
     message: messages.passwordsDidNotMatch,
     path: ["confirmPassword"], // Correct path for the confirmedPassword field
   });
+export const addressSchema = z.object({
+  address: z.string().min(1, {
+    message: "Address is required",
+  }),
+  country: z.string().min(1, {
+    message: "Address country is required",
+  }),
+  state: z.string().optional(),
+  city: z.string().optional(),
+  zip: z.string().optional(),
+});

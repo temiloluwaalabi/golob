@@ -46,7 +46,7 @@ const CustomPasswordInput = ({
         variant={"ghost"}
         type="button"
         size={"icon"}
-        className="p-0 w-fit hover:bg-transparent absolute right-0 -translate-x-3 top-0 h-full"
+        className="p-0 w-fit h-fit hover:bg-transparent absolute right-0 -translate-x-3 top-1/2 -translate-y-1/2"
         onClick={() => setShowPassword((prev) => !prev)}
         disabled={isPending}
       >

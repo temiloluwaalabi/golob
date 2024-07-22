@@ -1,5 +1,6 @@
 import * as z from "zod";
 import {
+  addressSchema,
   SetupPasswordCSchema,
   ValidateEmail,
   validatePassword,
@@ -27,6 +28,47 @@ export const RegisterSchema = z.object({
   terms: z.boolean().default(false),
 });
 
+export const AgencyIdentityVerificationSchema = z.object({
+  firstName: z.string().min(1, {
+    message: messages.firstNameRequired,
+  }),
+  lastName: z.string().min(1, {
+    message: messages.lastNameRequired,
+  }),
+  email: ValidateEmail,
+  number: z.string().min(1, {
+    message: messages.phoneNumber,
+  }),
+  auth: SetupPasswordCSchema,
+  terms: z.boolean().default(false),
+});
+
+export const AgencyIdentityKYCSchema = z.object({
+  country: z.string(),
+  identificationType: z.string(),
+  address: z.optional(addressSchema),
+  identificationNumber: z.string(),
+  docUrl: z.string(),
+  dob: z.date().optional(),
+});
+
+export const AgencyIdentityAddressProof = z.object({
+  addressLineOne: z.string(),
+  addressLineTwo: z.string(),
+  city: z.string(),
+  state: z.string(),
+  proofOfAddress: z.string(),
+});
+
+export const AgencyEssentialDetailsSchema = z.object({
+  agencyName: z.string(),
+  agencyEmail: z.string(),
+  agencyUniquePrefix: z.string(),
+  natureOfBusiness: z.string(),
+  businessType: z.string(),
+  legalBusinessName: z.string().optional(),
+  rcNumber: z.optional(z.string()),
+});
 export const EmailSchema = z.object({
   email: ValidateEmail,
 });

@@ -12,6 +12,8 @@ export const guestRoutes = [
   "/auth/verify-code",
   "/api/uploadthing",
   "/auth/error",
+  "/",
+  "/agency",
 ];
 
 export const sharedRoutes = ["shared-routes"];

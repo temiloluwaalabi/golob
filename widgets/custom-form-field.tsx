@@ -15,12 +15,24 @@ import CustomPasswordInput from "./password-widget";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 
 interface CustomFormFieldProps {
   control: Control<any>;
   fieldType: FormFieldTypes;
   inputClassName?: string;
   labelClassName?: string;
+  changeSelectValue?: (field: string) => void;
   name: string;
   label?: string;
   floatLabel?: boolean;
@@ -71,6 +83,34 @@ const RenderInput = ({ field, formFields }: Props) => {
         </FormControl>
       );
 
+    case FormFieldTypes.SELECT:
+      return (
+        <Select
+          onValueChange={(value) => {
+            field.onChange(value);
+            if (formFields.changeSelectValue) {
+              formFields.changeSelectValue(value);
+            }
+          }}
+          defaultValue={field.value}
+          // open={openTripWay}
+          // onOpenChange={setOpenTripWay}
+        >
+          <FormControl>
+            <SelectTrigger
+              className={cn(
+                "!bg-transparent !border-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0 w-full no-focus focus:ring-0 focus:ring-transparent focus:ring-offset-0 "
+              )}
+            >
+              <SelectValue
+                placeholder={formFields.placeholder}
+                className="!bg-transparent !border-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0 text-base font-mont font-normal"
+              />
+            </SelectTrigger>
+          </FormControl>
+          <SelectContent className="mt-2">{formFields.children}</SelectContent>
+        </Select>
+      );
     case FormFieldTypes.TEXTAREA:
       return (
         <FormControl>
@@ -79,10 +119,26 @@ const RenderInput = ({ field, formFields }: Props) => {
             {...field}
             disabled={formFields.disabled}
             className={cn(
-              "!bg-transparent !border-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:!ring-offset-0 ",
+              "!bg-transparent pt-4 !border-none focus-visible:ring-0 focus-visible:ring-transparent h-full focus-visible:!ring-offset-0 ",
               formFields.inputClassName
             )}
           />
+        </FormControl>
+      );
+
+    case FormFieldTypes.INPUT_OTP:
+      return (
+        <FormControl>
+          <InputOTP maxLength={6} {...field} disabled={formFields.disabled}>
+            <InputOTPGroup>
+              <InputOTPSlot index={0} />
+              <InputOTPSlot index={1} />
+              <InputOTPSlot index={2} />
+              <InputOTPSlot index={3} />
+              <InputOTPSlot index={4} />
+              <InputOTPSlot index={5} />
+            </InputOTPGroup>
+          </InputOTP>
         </FormControl>
       );
 
@@ -119,7 +175,8 @@ const CustomFormField = (props: CustomFormFieldProps) => {
             className={cn(
               "",
               props.fieldType !== FormFieldTypes.PASSWORD &&
-                "flex gap-1 items-center p-0 relative !bg-transparent pr-[10px] h-[56px] border rounded-md "
+                "flex gap-1 items-center p-0 relative !bg-transparent pr-[10px] h-[56px] border rounded-md ",
+              props.fieldType === FormFieldTypes.TEXTAREA && "h-auto"
             )}
           >
             {props.fieldType !== FormFieldTypes.CHECKBOX &&

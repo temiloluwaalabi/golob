@@ -3,7 +3,9 @@ import { AgencyInitialSteps } from "@/components/cards/agency-initial-steps";
 import ClientOnly from "@/components/shared/client-only";
 import { Button } from "@/components/ui/button";
 import * as React from "react";
-type Props = {};
+type Props = {
+  children?: React.ReactNode;
+};
 export const AgencyOnboardingWrapper = (props: Props) => {
   return (
     <div className="h-fit bg-white shadow rounded-[10px] p-2 grid grid-cols-12 gap-2 w-full lg:w-[1000px]">
@@ -11,15 +13,6 @@ export const AgencyOnboardingWrapper = (props: Props) => {
         <ClientOnly>
           <AgencyInitialSteps />
         </ClientOnly>
-        {/* <div>
-            <h3 className="text-xl font-bold">Personal Information</h3>
-            <p className="text-sm font-normal">
-              Fill out these details to create your account
-            </p>
-          </div>
-          <AgencyPersonalInformation /> */}
-        {/* <h2>Agency Essentials</h2>
-          <h3>KYC Documents</h3> */}
       </div>
       <div className="bg-white border rounded-[10px] flex flex-col gap-4 col-span-4 py-8 px-6 w-full">
         <div className="flex items-center gap-4 ">

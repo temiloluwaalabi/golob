@@ -26,3 +26,27 @@ export interface User {
   updatedAt: string | Date | null;
   // affiliates: Affiliate[];
 }
+type Field = {
+  label: string;
+  type: "text" | "file";
+  placeholder: string;
+};
+
+type Document = {
+  name: string;
+  fields: Field[];
+};
+
+type Documents = {
+  personal: Document[];
+  business: Document[];
+};
+
+type CountryKYC = {
+  country: string;
+  documents: Documents;
+};
+
+// export const kycDocs: CountryKYC[] = [
+//   // your data here
+// ];

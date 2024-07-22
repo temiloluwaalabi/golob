@@ -9,6 +9,7 @@ import { auth } from "@/auth";
 import NextTopLoader from "nextjs-toploader";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "sonner";
+import { CurrentUserProvider } from "@/context/current-user-provider";
 
 export const metadata: Metadata = {
   title: "Golobe",
@@ -35,8 +36,7 @@ export default async function RootLayout({
           <Toaster />
           <SonnerToaster />
           <NextTopLoader />
-
-          {children}
+          <CurrentUserProvider>{children}</CurrentUserProvider>
           <Footer />
         </body>
       </html>

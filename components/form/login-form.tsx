@@ -33,6 +33,7 @@ import { useCurrentAuthStore } from "@/store/authStore";
 export enum FormFieldTypes {
   INPUT = "input",
   POPOVER = " popover",
+  INPUT_OTP = "inputOTP",
   TEXTAREA = "textarea",
   PASSWORD = "inputPassword",
   PHONE_INPUT = "phoneInput",

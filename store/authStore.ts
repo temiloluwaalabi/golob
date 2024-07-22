@@ -1,3 +1,5 @@
+import { User } from "@/types";
+import { atom } from "jotai";
 import { create } from "zustand";
 
 interface AuthState {
@@ -6,6 +8,7 @@ interface AuthState {
   // ... other authentication-related state variables and actions ...
 }
 
+export const currentUserAtom = atom<User | null>(null);
 export const useAuthStore = create<AuthState>((set) => ({
   showAccountForm: false,
   setShowAccountForm: (show) => set({ showAccountForm: show }),

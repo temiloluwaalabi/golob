@@ -9,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import { AgencyPersonalInformation } from "../form/agency-forms";
 import { Button } from "../ui/button";
 import { Loader } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -31,7 +30,7 @@ export const AgencyInitialSteps = (props: Props) => {
         </CardDescription>
       </CardHeader>
       <CardContent className="p-0">
-        <AgencyPersonalInformation />
+        <h2>te</h2>
       </CardContent>
       <CardFooter className="p-0  gap-4 mt-auto">
         <Button className="w-full h-[48px] bg-transparent border-2 border-primary rounded-md text-sm hover:bg-primary hover:text-white font-semibold text-primary-blackishGreen">
