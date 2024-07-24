@@ -24,7 +24,12 @@ interface PersonalDetailsKYC {
   country: string;
   identificationType: string;
   identificationNumber: string;
-  docUrl: string;
+  docUrl: {
+    name: string;
+    url: string;
+    size: number;
+    key?: string;
+  }[];
 }
 interface PersonalAddress {
   addressLineOne: string;
@@ -68,7 +73,14 @@ export const verifyPersonalDetailsKYCAtom = atom<PersonalDetailsKYC>({
   country: "",
   identificationType: "",
   identificationNumber: "",
-  docUrl: "",
+  docUrl: [
+    {
+      name: "",
+      url: "",
+      size: 0,
+      key: "" || undefined,
+    },
+  ],
 });
 export const verifyPersonalAddressAtom = atom<PersonalAddress>({
   addressLineOne: "",

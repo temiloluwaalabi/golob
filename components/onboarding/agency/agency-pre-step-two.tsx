@@ -13,7 +13,7 @@ import {
 import { Loader } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { useToast } from "@/components/ui/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -33,6 +33,8 @@ import {
   verifyPersonalDetailsKYCAtom,
 } from "@/store/agency-pre-onboarding";
 import { useAtom } from "jotai";
+import { ENDPOINTS } from "@/components/shared/upload-zone";
+import UploadZone from "@/components/shared/upzone";
 // @flow
 type Props = {
   isLoading?: boolean;
@@ -55,11 +57,22 @@ export const AgencyPreOnboardingStepTwo = (props: Props) => {
       country: data.country || "",
       identificationNumber: data.identificationNumber || "",
       identificationType: data.identificationType || "",
-      docUrl: data.docUrl || "",
+      docUrl: data.docUrl.map((doc) => ({
+        name: doc.name,
+        url: doc.url,
+        size: doc.size,
+        key: doc.key || undefined,
+      })),
     },
   });
 
   console.log(form.watch());
+
+  console.log("Init U", form.getValues("docUrl"));
+  const uploadCOm = form
+    .getValues("docUrl")
+    .filter((item: any) => item.name && item.url && item.key);
+  console.log("Upload", uploadCOm);
   const handleDocumentChange = (documentName: string) => {
     // console.log(documentName);
     if (kycDocuments) {
@@ -103,7 +116,13 @@ export const AgencyPreOnboardingStepTwo = (props: Props) => {
         country: values.country,
         identificationNumber: values.identificationNumber,
         identificationType: values.identificationType,
-        docUrl: values.docUrl,
+        docUrl: values.docUrl.map((doc) => ({
+          ...doc,
+          name: doc.name,
+          size: doc.size,
+          key: doc.key,
+          url: doc.url,
+        })),
       }));
       // CreateUser(values).then((data: { error: any; success: any; }) => {
       //   if (data.error) {
@@ -224,9 +243,32 @@ export const AgencyPreOnboardingStepTwo = (props: Props) => {
                 />
               </div>
             )}
-            {(selectedDocument || form.getValues("docUrl") !== "") && (
+            {(selectedDocument || uploadCOm.length > 0) && (
               <div className="col-span-12">
-                <CustomFormField
+                <FormField
+                  name="docUrl"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <UploadZone
+                          name={field.name}
+                          form={form}
+                          label={selectedDocument?.fields[1].label}
+                          getValues={form.getValues}
+                          setValue={form.setValue}
+                          // disabled={isPending}
+                          endpoint={ENDPOINTS.pdf}
+                          // renderAs={"field"}
+                          // maxFiles={4}
+                          // isDialog={false}
+                          required
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                {/* <CustomFormField
                   fieldType={FormFieldTypes.INPUT}
                   disabled={isPending}
                   control={form.control}
@@ -234,7 +276,7 @@ export const AgencyPreOnboardingStepTwo = (props: Props) => {
                   inputType="text"
                   label={selectedDocument?.fields[1].label}
                   placeholder={selectedDocument?.fields[1].placeholder}
-                />
+                /> */}
               </div>
             )}
           </CardContent>

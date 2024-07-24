@@ -6,6 +6,9 @@ export const FileSchema = z.object({
   size: z.number(),
   key: z.optional(z.string()),
 });
+export const ImageSchema = z.object({
+  images: z.array(z.instanceof(File)),
+});
 export const OTPSchema = z.object({
   otp: z.coerce
     .number()

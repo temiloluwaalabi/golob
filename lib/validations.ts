@@ -1,6 +1,7 @@
 import * as z from "zod";
 import {
   addressSchema,
+  FileSchema,
   SetupPasswordCSchema,
   ValidateEmail,
   validatePassword,
@@ -48,7 +49,7 @@ export const AgencyIdentityKYCSchema = z.object({
   identificationType: z.string(),
   address: z.optional(addressSchema),
   identificationNumber: z.string(),
-  docUrl: z.string(),
+  docUrl: z.array(FileSchema),
   dob: z.date().optional(),
 });
 
