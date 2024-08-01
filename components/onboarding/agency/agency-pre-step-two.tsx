@@ -29,6 +29,7 @@ import { FormFieldTypes } from "@/components/form/login-form";
 import { SelectItem } from "@/components/ui/select";
 import { CountryKYC, Document } from "@/types";
 import {
+  PreOnboardingData,
   useAgencyPeOnboardingAtom,
   verifyPersonalDetailsKYCAtom,
 } from "@/store/agency-pre-onboarding";
@@ -44,6 +45,7 @@ export const AgencyPreOnboardingStepTwo = (props: Props) => {
   const { goToNextStep, setStep, step, goToPreviousStep } =
     useAgencyPeOnboardingAtom();
   const [data, setData] = useAtom(verifyPersonalDetailsKYCAtom);
+  const [generalData, setGeneralData] = useAtom(PreOnboardingData);
 
   const [kycDocuments, setkycDocuments] = useState<CountryKYC | null>(null);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(
@@ -65,14 +67,9 @@ export const AgencyPreOnboardingStepTwo = (props: Props) => {
       })),
     },
   });
-
-  console.log(form.watch());
-
-  console.log("Init U", form.getValues("docUrl"));
   const uploadCOm = form
     .getValues("docUrl")
     .filter((item: any) => item.name && item.url && item.key);
-  console.log("Upload", uploadCOm);
   const handleDocumentChange = (documentName: string) => {
     // console.log(documentName);
     if (kycDocuments) {
@@ -116,7 +113,23 @@ export const AgencyPreOnboardingStepTwo = (props: Props) => {
         country: values.country,
         identificationNumber: values.identificationNumber,
         identificationType: values.identificationType,
-        docUrl: values.docUrl.map((doc) => ({
+        docUrl: values.docUrl
+          .filter((item: any) => item.name && item.url && item.key)
+          .map((doc) => ({
+            ...doc,
+            name: doc.name,
+            size: doc.size,
+            key: doc.key,
+            url: doc.url,
+          })),
+      }));
+
+      setGeneralData((prev) => ({
+        ...prev,
+        country: values.country,
+        identificationNumber: values.identificationNumber,
+        identificationType: values.identificationType,
+        docUrl: uploadCOm.map((doc) => ({
           ...doc,
           name: doc.name,
           size: doc.size,
@@ -124,6 +137,7 @@ export const AgencyPreOnboardingStepTwo = (props: Props) => {
           url: doc.url,
         })),
       }));
+      // TODO: Verify Identification Number
       // CreateUser(values).then((data: { error: any; success: any; }) => {
       //   if (data.error) {
       //     toast({
@@ -252,6 +266,7 @@ export const AgencyPreOnboardingStepTwo = (props: Props) => {
                     <FormItem>
                       <FormControl>
                         <UploadZone
+                          fileNamePrefix={selectedDocument?.name || "identity"}
                           name={field.name}
                           form={form}
                           label={selectedDocument?.fields[1].label}
@@ -281,21 +296,6 @@ export const AgencyPreOnboardingStepTwo = (props: Props) => {
             )}
           </CardContent>
           <CardFooter className="p-0  gap-4 mt-auto">
-            <Button
-              type="button"
-              disabled={isPending}
-              className="w-full h-[48px] bg-transparent border-2 border-primary rounded-md text-sm hover:bg-primary hover:text-white font-semibold text-primary-blackishGreen"
-              onClick={goToPreviousStep}
-            >
-              {/* <Loader
-                className={cn(
-                  "animate-spin size-4 me-2 hidden",
-                  props.isLoading && "flex"
-                )}
-              /> */}
-              Back
-            </Button>
-            <div></div>
             <Button
               type="submit"
               disabled={isPending}

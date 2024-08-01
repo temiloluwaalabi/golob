@@ -15,9 +15,12 @@ import UploadIcon from "../icons/upload";
 import { ENDPOINTS } from "./upload-zone";
 import { Progress } from "../ui/progress";
 import { interval } from "date-fns";
+import { UploadThingError } from "uploadthing/server";
+import { SerializedUploadThingError } from "@uploadthing/shared";
 interface UploadZoneProps {
   label?: string;
   field?: any;
+  fileNamePrefix: string;
   name: any;
   form: any;
   getValues: any;
@@ -40,7 +43,10 @@ interface FileType {
   size: number;
   key: string;
 }
-
+interface CustomFile extends File {
+  status: "pending" | "uploading" | "success" | "error";
+  error?: Error;
+}
 const UploadZone = ({
   label,
   name,
@@ -56,16 +62,20 @@ const UploadZone = ({
   isDialog,
   disabled,
   maxFiles,
+  fileNamePrefix,
   type,
   required,
 }: UploadZoneProps) => {
   const [files, setFiles] = useState<File[]>([]);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [uploading, setIsUploading] = useState<boolean>(false);
-  //   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [uploadProgress, setUploadProgress] = useState<{
     [key: string]: number; // Object to store progress for each file
   }>({});
+  const [uploadigError, setUploadingError] = useState<{
+    [key: string]: number; // Object to store progress for each file
+  }>({});
+  const [uploadError, setUploadError] = useState<Error | null>(null); // Error state
   const onDrop = useCallback(
     (acceptedFiles: FileWithPath[]) => {
       setFiles([
@@ -73,6 +83,7 @@ const UploadZone = ({
           Object.assign(file, {
             preview: URL.createObjectURL(file),
             id: `${file.name}-${file.size}-${Date.now()}`,
+            // status: "pending"
           })
         ),
       ]);
@@ -113,9 +124,6 @@ const UploadZone = ({
     ? []
     : getValues(name).filter((item: any) => item.name && item.url && item.key);
 
-  // console.log("values from uploadzone", getValues(name));
-
-  // console.log("uploaded Items", uploadedItems);
   const notUploadedItems = files.filter(
     (file) =>
       !uploadedItems?.some(
@@ -155,6 +163,12 @@ const UploadZone = ({
         // console.log("res", res);
         if (setValue) {
           const currentValue = getValues(name);
+          // res?.forEach((r) => {
+          //   const file = files.find((f) => f.name === r.name)
+          //   if(file){
+          //     file.status = "success"
+          //   }
+          // })
           const respondedUrls =
             res?.map((r) => ({
               name: r.name,
@@ -176,17 +190,55 @@ const UploadZone = ({
           description: "Package Images Uploaded",
         });
       },
-      //   onUploadProgress: (progress: number) => { // This now takes a single number
-      //     setUploadProgress((prevProgress) => ({
-      //       ...prevProgress,
-      //       [file.id]: progress,
-      //     }));
-      //   },
+      onBeforeUploadBegin: (files) => {
+        return files.map(
+          (f) =>
+            new File([f], `renamed-${fileNamePrefix}` + f.name, {
+              type: f.type,
+            })
+        );
+      },
+      onUploadBegin: (fileName) => {
+        console.log(fileName);
+      },
       onUploadError: (error: Error) => {
-        console.error(error);
-        toast({
-          description: `${error.message}`,
-        });
+        if (error instanceof UploadThingError) {
+          console.log(error.code);
+          console.log(error.data);
+          switch (error.code) {
+            case "TOO_LARGE":
+              toast({
+                description: "File size exceeds the allowed limit.",
+              });
+              break;
+            case "TOO_MANY_FILES":
+              toast({
+                description: "You have exceeded the allowed number of files.",
+              });
+              break;
+            case "UPLOAD_FAILED":
+              toast({
+                description:
+                  "An error occurred while uploading. Please try again.",
+              });
+              break;
+            default:
+              toast({
+                description: "An unexpected error occurred.",
+              });
+              console.error("Detailed error:", error); // Log the error for debugging
+          }
+        } else {
+          // Handle generic errors
+          toast({
+            description: "An error occurred while uploading. Please try again.",
+          });
+          console.error("Detailed error:", error);
+        }
+
+        // toast({
+        //   description: `${error.message}`,
+        // });
       },
     }
   );
@@ -199,153 +251,7 @@ const UploadZone = ({
     onDrop,
     accept: fileTypes ? generateClientDropzoneAccept(fileTypes) : undefined,
   });
-  //   const renderFileStatus = (file: File) => {
-  //     switch (file.status) {
-  //       case "uploading":
-  //         return (
-  //           <div
-  //             className="flex items-center justify-between border border-dashed space-x-2 p-4 rounded-[10px]"
-  //             key={file.id}
-  //           >
-  //             <div className="flex items-center space-x-4">
-  //               <div>
-  //                 {props.endpoint === ENDPOINTS.pdf ? (
-  //                   <Image
-  //                     src="/assets/pdf.png"
-  //                     width={44}
-  //                     height={48}
-  //                     alt="PDF Preview"
-  //                     className="object-cover"
-  //                   />
-  //                 ) : (
-  //                   <div className="">
-  //                     <MediaPreview name={file.name} url={file.preview || ""} />
-  //                   </div>
-  //                 )}
-  //               </div>
 
-  //               <div className="space-y-1">
-  //                 <span className="text-sm font-bold">Uploading Document</span>
-  //                 <Progress className="h-[6px]" value={file.progress} max={100} />
-  //                 <p className="text-xs">
-  //                   <span className="text-xs">{file.name}</span> |{" "}
-  //                   {formatBytes(file.size)} | {file.progress}% Completed
-  //                 </p>
-  //               </div>
-  //             </div>
-  //             <Button
-  //               className="bg-primary-salmon hover:bg-primary-blackishGreen size-7"
-  //               size={"icon"}
-  //               disabled={isUploading}
-  //             >
-  //               <X className="size-4" />
-  //             </Button>
-
-  //             {/* <span className="text-gray-600">{file.name}</span>
-  //             <Progress value={file.progress} max={100} />
-  //             <span>{file.progress}%</span> */}
-  //           </div>
-  //         );
-
-  //       case "success":
-  //         return (
-  //           <div className="bg-green-100 flex items-center justify-between border border-dashed space-x-2 p-4 rounded-[10px]">
-  //             <div className="flex items-center space-x-4">
-  //               <div>
-  //                 {props.endpoint === ENDPOINTS.pdf ? (
-  //                   <Image
-  //                     src="/assets/pdf.png"
-  //                     width={44}
-  //                     height={48}
-  //                     alt="PDF Preview"
-  //                     className="object-cover"
-  //                   />
-  //                 ) : (
-  //                   <div>
-  //                     <MediaPreview name={file.name} url={file.preview || ""} />
-  //                   </div>
-  //                 )}
-  //               </div>
-
-  //               <div className="space-y-1">
-  //                 <span className="text-sm font-bold text-green-600">
-  //                   Upload Successful
-  //                 </span>
-  //                 <Progress className="h-[6px]" value={file.progress} max={100} />
-  //                 <p className="text-xs">
-  //                   <span className="text-xs">{file.name}</span> |{" "}
-  //                   {formatBytes(file.size)} | {file.progress}% Completed
-  //                 </p>
-  //               </div>
-  //             </div>
-  //             <Button
-  //               className="bg-primary-salmon hover:bg-primary-blackishGreen size-7"
-  //               size={"icon"}
-  //               disabled={isUploading}
-  //             >
-  //               <X className="size-4" />
-  //             </Button>
-
-  //             {/* <span className="text-gray-600">{file.name}</span>
-  //             <Progress value={file.progress} max={100} />
-  //             <span>{file.progress}%</span> */}
-  //           </div>
-  //         );
-
-  //       case "error":
-  //         return (
-  //           <div className="bg-pink-100 flex items-center justify-between border border-dashed space-x-2 p-4 rounded-[10px]">
-  //             <div className="flex items-center space-x-4">
-  //               <div>
-  //                 {props.endpoint === ENDPOINTS.pdf ? (
-  //                   <Image
-  //                     src="/assets/pdf.png"
-  //                     width={44}
-  //                     height={48}
-  //                     alt="PDF Preview"
-  //                     className="object-cover"
-  //                   />
-  //                 ) : (
-  //                   <div>
-  //                     <MediaPreview name={file.name} url={file.preview || ""} />
-  //                   </div>
-  //                 )}
-  //               </div>
-
-  //               <div className="space-y-1">
-  //                 <span className="text-sm text-pink-600 font-bold">
-  //                   Upload Failed! Please try again
-  //                 </span>
-  //                 <Progress
-  //                   className="h-[6px] bg-pink-600 "
-  //                   value={file.progress}
-  //                   max={100}
-  //                 />
-  //                 <p className="text-xs">
-  //                   <span className="text-xs">{file.name}</span> |{" "}
-  //                   {formatBytes(file.size)} | {file.progress}% Completed
-  //                 </p>
-  //               </div>
-  //             </div>
-  //             <Button
-  //               className="bg-primary-salmon text-white hover:bg-primary-blackishGreen"
-  //               variant={"ghost"}
-  //               disabled={isUploading}
-  //             >
-  //               <Loader2 className="size-4 me-2" />
-  //               Reupload
-  //             </Button>
-
-  //             {/* <span className="text-gray-600">{file.name}</span>
-  //           <Progress value={file.progress} max={100} />
-  //           <span>{file.progress}%</span> */}
-  //           </div>
-  //         );
-
-  //       default:
-  //         return null;
-  //     }
-  //   };
   return (
     <div className="flex flex-col gap-4">
       {label && (
@@ -353,62 +259,6 @@ const UploadZone = ({
           {label} {required && <span className="text-primary-500 ms-1">*</span>}
         </span>
       )}
-      {/* <div
-        className={cn(
-          "flex items-center justify-center flex-row gap-4 space-x-4 w-full border border-dashed border-gray-700/30 h-full dark:border-dark-400 px-4 rounded-md py-5 transition-all duration-300",
-          !isEmpty(files) &&
-            "flex flex-wrap w-full items-center justify-between xl:flex-nowrap xl:pr-6"
-        )}
-      >
-        <div
-          {...getRootProps()}
-          className={cn(
-            "cursor-pointer",
-            isEmpty(files) ? "justify-center" : "flex-grow justify-center"
-          )}
-        >
-          <div className="flex  items-center gap-4">
-            <input {...getInputProps()} />
-            <UploadIcon className="size-10" />
-            <div className="flex flex-col items-center">
-              <h4 className="text-sm dark:text-light-700">
-                Click to upload or drag and drop
-              </h4>
-              <p className="text-xs dark:text-light-500">
-                PNG, or JPG (max. 800x400px)
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="">
-          {!isEmpty(files) && !isEmpty(notUploadedItems) && (
-            <UploadButtons
-              files={notUploadedItems}
-              isLoading={isUploading}
-              onClear={() => setFiles([])}
-              onUpload={() => startUpload(notUploadedItems)}
-            />
-          )}
-
-          {isEmpty(files) && !isEmpty(notUploadedItems) && (
-            <UploadButtons
-              files={notUploadedItems}
-              isLoading={isUploading}
-              onClear={() => setFiles([])}
-              onUpload={() => startUpload(notUploadedItems)}
-            />
-          )}
-
-          {!isEmpty(files) && isEmpty(notUploadedItems) && (
-            <UploadButtons
-              files={files}
-              isLoading={isUploading}
-              onClear={() => setFiles([])}
-              onUpload={() => startUpload(files)}
-            />
-          )}
-        </div>
-      </div> */}
       <div
         className={cn(
           "border border-dashed border-gray-700/30 h-full flex justify-between items-center  gap-4 space-x-4 rounded-md py-5 transition-all duration-300 px-4"
@@ -517,12 +367,13 @@ const UploadZone = ({
                   <Progress
                     className="h-[6px] w-full bg-zinc-200"
                     indicatorColor={progress === 100 ? "bg-green-500" : ""}
-                    value={progress}
+                    value={uploadedItems.includes(file) ? 100 : progress}
                     max={100}
                   />
                   <p className="text-xs">
                     <span className="text-xs">{file.name}</span> |{" "}
-                    {formatBytes(file.size)} | {progress}% Completed
+                    {formatBytes(file.size)} |{" "}
+                    {uploadedItems.includes(file) ? "100" : progress}% Completed
                   </p>
                 </div>
               </div>
@@ -558,16 +409,6 @@ function UploadButtons({
 }) {
   return (
     <div className="flex w-full flex-wrap items-center h-full justify-center gap-2  pb-5 sm:flex-nowrap xl:w-auto xl:justify-end xl:px-0 xl:pb-0">
-      {/* <Button
-        type="button"
-        variant="outline"
-        className="bg-transparent border dark:light-border-2 dark:text-light-500 dark:hover:text-black gap-2 xl:w-auto"
-        disabled={isLoading}
-        onClick={onClear}
-      >
-        <Trash />
-        Clear {files.length} files
-      </Button> */}
       <Button
         type="button"
         variant={"ghost"}

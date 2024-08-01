@@ -11,11 +11,14 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { PreOnboardingData } from "@/store/agency-pre-onboarding";
+import { useAtom } from "jotai";
 
 // @flow
 type Props = {};
 export const AgencyPreOnboardingFinal = (props: Props) => {
   const pathname = usePathname();
+  const [generalData, setGeneralData] = useAtom(PreOnboardingData);
 
   return (
     <Card className="border-none bg-transparent outline-none focus-visible:ring-0 focus-visible:!ring-offset-0 shadow-none p-0 flex flex-col h-full   gap-8">
@@ -56,7 +59,7 @@ export const AgencyPreOnboardingFinal = (props: Props) => {
             className="bg-primary-blackishGreen hover:bg-primary mt-4"
             asChild
           >
-            <Link href="/auth/sign-in">Sign In</Link>
+            <Link href="/auth/login">Sign In</Link>
           </Button>
         </div>
       </CardContent>

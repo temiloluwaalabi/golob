@@ -58,7 +58,8 @@ export const AgencyIdentityAddressProof = z.object({
   addressLineTwo: z.string(),
   city: z.string(),
   state: z.string(),
-  proofOfAddress: z.string(),
+  addressProofType: z.string(),
+  proofOfAddress: z.array(FileSchema),
 });
 
 export const AgencyEssentialDetailsSchema = z.object({
@@ -67,6 +68,29 @@ export const AgencyEssentialDetailsSchema = z.object({
   agencyUniquePrefix: z.string(),
   natureOfBusiness: z.string(),
   businessType: z.string(),
+  legalBusinessName: z.string().optional(),
+  rcNumber: z.optional(z.string()),
+});
+
+export const GeneralPreOnboardingSchema = z.object({
+  country: z.string().optional(),
+  identificationType: z.string().optional(),
+  address: z.optional(addressSchema),
+  identificationNumber: z.string().optional(),
+  docUrl: z.array(FileSchema).optional(),
+  dob: z.date().optional(),
+  addressLineOne: z.string().optional(),
+  addressLineTwo: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  addressProofType: z.string(),
+
+  proofOfAddress: z.array(FileSchema).optional(),
+  agencyName: z.string().optional(),
+  agencyEmail: z.string().optional(),
+  agencyUniquePrefix: z.string().optional(),
+  natureOfBusiness: z.string().optional(),
+  businessType: z.string().optional(),
   legalBusinessName: z.string().optional(),
   rcNumber: z.optional(z.string()),
 });

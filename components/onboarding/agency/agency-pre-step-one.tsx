@@ -32,6 +32,7 @@ import { Form } from "@/components/ui/form";
 import { FormFieldTypes } from "@/components/form/login-form";
 import { useAtom, useAtomValue } from "jotai";
 import {
+  initialPreOnboardingData,
   persoanlDetailsAtom,
   useAgencyPeOnboardingAtom,
 } from "@/store/agency-pre-onboarding";
@@ -52,6 +53,7 @@ type Props = {
 };
 export const AgencyPreOnboardingStepOne = (props: Props) => {
   const currentUser = useAtomValue(currentUserAtom);
+  const [setLogin, setSetLogin] = useState(false);
   const pathname = usePathname();
   const [data, setData] = useAtom(persoanlDetailsAtom);
   const [clientUser, setClientUser] = useState<User | null>(null);
@@ -81,13 +83,12 @@ export const AgencyPreOnboardingStepOne = (props: Props) => {
       email: currentUser?.email || data.email || "",
       number: currentUser?.phoneNumber || data.phoneNumber || "",
       auth: {
-        password: data.passport,
+        password: data.password,
         confirmPassword: data.confirmPassword,
       },
     });
   }, [currentUser, data, form]);
 
-  console.log(form.watch());
   const handleSubmit = async (
     values: z.infer<typeof AgencyIdentityVerificationSchema>
   ) => {
@@ -101,6 +102,7 @@ export const AgencyPreOnboardingStepOne = (props: Props) => {
             description: data.error,
             variant: "destructive",
           });
+          router.push("/auth/login");
         }
 
         if (data.success) {
@@ -109,13 +111,14 @@ export const AgencyPreOnboardingStepOne = (props: Props) => {
             description:
               "A link to verify your email has been sent to your mail. Please verify your mail",
           });
+
           setData((prev) => ({
             ...prev,
             firstName: values.firstName,
             lastName: values.lastName,
             email: values.email,
             phoneNumber: values.number,
-            passport: values.auth.password,
+            password: values.auth.password,
             confirmPassword: values.auth.confirmPassword,
           }));
           goToNextStep();
@@ -126,12 +129,21 @@ export const AgencyPreOnboardingStepOne = (props: Props) => {
     });
   };
   return (
-    <Card className="border-none bg-transparent outline-none focus-visible:ring-0 focus-visible:!ring-offset-0 shadow-none p-0 flex flex-col h-full   gap-8">
+    <Card className="border-none bg-transparent outline-none focus-visible:ring-0 focus-visible:!ring-offset-0 shadow-none p-0 flex flex-col justify-between h-full   gap-8">
       <CardHeader className="p-0">
         <CardTitle>
-          <h3 className="text-xl font-bold">
-            {currentUser?.id ? "Account Found" : "Create your Account"}
-          </h3>
+          <div className="flex justify-between items-center">
+            <h3 className="text-xl font-bold">
+              {currentUser?.id ? "Account Found" : "Create your Account"}
+            </h3>
+            {/* <Button
+              variant={"link"}
+              className="flex items-center"
+              onClick={() => router.push("/auth/login")}
+            >
+              Login <ChevronRight className="size-4 ms-2" />
+            </Button> */}
+          </div>
         </CardTitle>
         <CardDescription>
           <p className="text-sm font-normal">
@@ -181,116 +193,154 @@ export const AgencyPreOnboardingStepOne = (props: Props) => {
           </div>
         </>
       ) : (
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-6 "
-          >
-            <CardContent className="p-0 space-y-6">
-              <div className="grid grid-cols-12 gap-4">
-                <div className="col-span-12">
-                  <CustomFormField
-                    fieldType={FormFieldTypes.INPUT}
-                    disabled={isPending}
-                    control={form.control}
-                    name="firstName"
-                    inputType="text"
-                    label="First Name"
-                    labelClassName="bg-[#fcfcfc]"
-                    inputClassName="bg-red-900"
-                    placeholder="Enter your firstname"
-                  />
-                </div>
-                <div className="col-span-12">
-                  <CustomFormField
-                    fieldType={FormFieldTypes.INPUT}
-                    disabled={isPending}
-                    control={form.control}
-                    name="lastName"
-                    inputType="text"
-                    label="Last Name"
-                    placeholder="Enter your lastname"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-12 gap-4">
-                <div className={cn("col-span-12")}>
-                  <CustomFormField
-                    fieldType={FormFieldTypes.INPUT}
-                    disabled={isPending}
-                    control={form.control}
-                    name="email"
-                    inputType="email"
-                    label="General Email"
-                    placeholder="Enter your email"
-                  />
-                </div>
-                <div className={cn("col-span-12")}>
-                  <CustomFormField
-                    fieldType={FormFieldTypes.INPUT}
-                    disabled={isPending}
-                    control={form.control}
-                    name="number"
-                    inputType="number"
-                    label="Phone Number"
-                    placeholder="Enter your phone number"
-                  />
-                </div>
-              </div>
+        // <Form {...form}>
+        //   <form
+        //     onSubmit={form.handleSubmit(handleSubmit)}
+        //     className="space-y-6 "
+        //   >
+        //     <CardContent className="p-0 space-y-6">
+        //       <div className="grid grid-cols-12 gap-4">
+        //         <div className="col-span-12">
+        //           <CustomFormField
+        //             fieldType={FormFieldTypes.INPUT}
+        //             disabled={isPending}
+        //             control={form.control}
+        //             name="firstName"
+        //             inputType="text"
+        //             label="First Name"
+        //             labelClassName="bg-[#fcfcfc]"
+        //             inputClassName="bg-red-900"
+        //             placeholder="Enter your firstname"
+        //           />
+        //         </div>
+        //         <div className="col-span-12">
+        //           <CustomFormField
+        //             fieldType={FormFieldTypes.INPUT}
+        //             disabled={isPending}
+        //             control={form.control}
+        //             name="lastName"
+        //             inputType="text"
+        //             label="Last Name"
+        //             placeholder="Enter your lastname"
+        //           />
+        //         </div>
+        //       </div>
+        //       <div className="grid grid-cols-12 gap-4">
+        //         <div className={cn("col-span-12")}>
+        //           <CustomFormField
+        //             fieldType={FormFieldTypes.INPUT}
+        //             disabled={isPending}
+        //             control={form.control}
+        //             name="email"
+        //             inputType="email"
+        //             label="General Email"
+        //             placeholder="Enter your email"
+        //           />
+        //         </div>
+        //         <div className={cn("col-span-12")}>
+        //           <CustomFormField
+        //             fieldType={FormFieldTypes.INPUT}
+        //             disabled={isPending}
+        //             control={form.control}
+        //             name="number"
+        //             inputType="number"
+        //             label="Phone Number"
+        //             placeholder="Enter your phone number"
+        //           />
+        //         </div>
+        //       </div>
 
-              <div className="grid grid-cols-12 gap-4">
-                <div className="col-span-12 ">
-                  <CustomFormField
-                    fieldType={FormFieldTypes.PASSWORD}
-                    disabled={isPending}
-                    control={form.control}
-                    name="auth.password"
-                    labelClassName="bg-[#fcfcfc]"
-                    label="Password"
-                    passwordLabel="Password"
-                  />
-                </div>
-                <div className="col-span-12 ">
-                  <CustomFormField
-                    fieldType={FormFieldTypes.PASSWORD}
-                    disabled={isPending}
-                    control={form.control}
-                    labelClassName="bg-[#fcfcfc]"
-                    name="auth.confirmPassword"
-                    label="Confirm Password"
-                    passwordLabel="Confirm Password"
-                  />
-                </div>
+        //       <div className="grid grid-cols-12 gap-4">
+        //         <div className="col-span-12 ">
+        //           <CustomFormField
+        //             fieldType={FormFieldTypes.PASSWORD}
+        //             disabled={isPending}
+        //             control={form.control}
+        //             name="auth.password"
+        //             labelClassName="bg-[#fcfcfc]"
+        //             label="Password"
+        //             passwordLabel="Password"
+        //           />
+        //         </div>
+        //         <div className="col-span-12 ">
+        //           <CustomFormField
+        //             fieldType={FormFieldTypes.PASSWORD}
+        //             disabled={isPending}
+        //             control={form.control}
+        //             labelClassName="bg-[#fcfcfc]"
+        //             name="auth.confirmPassword"
+        //             label="Confirm Password"
+        //             passwordLabel="Confirm Password"
+        //           />
+        //         </div>
+        //       </div>
+        //     </CardContent>
+        //     <CardFooter className="p-0  gap-4 mt-auto ">
+        //       {/* <Button
+        //         className="w-full h-[48px] bg-transparent border-2 border-primary rounded-md text-sm hover:bg-primary hover:text-white font-semibold text-primary-blackishGreen"
+        //         type="button"
+        //       >
+        //         <Loader
+        //           className={cn(
+        //             "animate-spin size-4 me-2 hidden",
+        //             props.isLoading && "flex"
+        //           )}
+        //         />
+        //         {props.isLoading ? "Saving Draft..." : "Save Draft"}
+        //       </Button> */}
+        //       <Button
+        //         className=" w-fit h-[48px] rounded-md text-sm hover:bg-primary-blackishGreen hover:text-white font-semibold text-primary-blackishGreen ml-auto"
+        //         type="submit"
+        //       >
+        //         <Loader
+        //           className={cn(
+        //             "animate-spin size-4 me-2 hidden",
+        //             props.isLoading && "flex"
+        //           )}
+        //         />
+        //         {props.isLoading ? "Loading..." : "Next Step"}
+        //       </Button>
+        //     </CardFooter>
+        //   </form>
+        // </Form>
+        <div className=" bg-white border p-4 rounded-[10px]  bg-transparent outline-none focus-visible:ring-0 focus-visible:!ring-offset-0 shadow-none flex flex-col h-fit justify-center  gap-8">
+          <div className="p-0">
+            <CardTitle>
+              <div className="flex justify-between items-center">
+                <h3 className="text-xl font-bold">Please Login</h3>
+                {/* <Button
+      variant={"link"}
+      className="flex items-center"
+      onClick={() => router.push("/auth/login")}
+    >
+      Login <ChevronRight className="size-4 ms-2" />
+    </Button> */}
               </div>
-            </CardContent>
-            <CardFooter className="p-0  gap-4 mt-auto ">
-              {/* <Button
-                className="w-full h-[48px] bg-transparent border-2 border-primary rounded-md text-sm hover:bg-primary hover:text-white font-semibold text-primary-blackishGreen"
-                type="button"
-              >
-                <Loader
-                  className={cn(
-                    "animate-spin size-4 me-2 hidden",
-                    props.isLoading && "flex"
-                  )}
-                />
-                {props.isLoading ? "Saving Draft..." : "Save Draft"}
-              </Button> */}
-              <Button
-                className=" w-fit h-[48px] rounded-md text-sm hover:bg-primary-blackishGreen hover:text-white font-semibold text-primary-blackishGreen ml-auto"
-                type="submit"
-              >
-                <Loader
-                  className={cn(
-                    "animate-spin size-4 me-2 hidden",
-                    props.isLoading && "flex"
-                  )}
-                />
-                {props.isLoading ? "Loading..." : "Next Step"}
-              </Button>
-            </CardFooter>
-          </form>
-        </Form>
+            </CardTitle>
+            <CardDescription>
+              <p className="text-sm font-normal">
+                You&apos;ve to be logged into your account to start the agency
+                onboarding process, please visit the login page to access your
+                account or the registration page to create your account
+              </p>
+            </CardDescription>
+          </div>
+          <div className="p-0 flex items-center gap-4 justify-between">
+            <Button
+              className="w-full"
+              variant={"outline"}
+              onClick={() => router.push("/auth/login")}
+            >
+              Login
+            </Button>
+            <Button
+              className="w-full hover:bg-primary-blackishGreen"
+              onClick={() => router.push("/auth/sign-up")}
+            >
+              Sign Up
+            </Button>
+          </div>
+        </div>
       )}
     </Card>
   );

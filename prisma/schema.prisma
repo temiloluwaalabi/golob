@@ -45,11 +45,15 @@ enum AgencyStatus {
 }
 
 enum KycDocumentType {
-  BUSINESS_REGISTRATION
-  TAX_CERTIFICATE
+  AGENCY_PROOF
   IDENTITY_PROOF
+  ADDRESS_PROOF
   // Add other document types as needed
 }
+
+// enum KycDocumentDoc {
+//   Nigerian_Bank_Verification_Number
+// }
 
 enum Permission {
   Read
@@ -74,7 +78,10 @@ model User {
   secondEmail           String?
   image                 String?
   phoneNumber           String?
-  address               String?
+  addressOne            String?
+  addressTwo            String?
+  city                  String?
+  state                 String?
   dob                   DateTime?
   emailVerified         DateTime?
   hashedPassword        String?
@@ -93,6 +100,8 @@ model User {
   accountType           AccountType            @default(Personal)
 
   // @@map("users")
+  KycDocument KycDocument[]
+  Agency      Agency[]
 }
 
 model Account {
@@ -183,36 +192,47 @@ model Authenticator {
 }
 
 model Agency {
-  id             String        @id @default(cuid()) @map("_id")
-  name           String        @unique // Unique agency name
-  email          String        @unique // Agency contact email
-  password       String
-  phoneNumber    String?
-  website        String?
-  address        String?
-  country        String?
-  description    String?
-  logo           String? // URL to agency logo
-  status         AgencyStatus  @default(PENDING)
-  kycDocuments   KycDocument[]
+  id                         String        @id @default(cuid()) @map("_id")
+  name                       String        @unique // Unique agency name
+  email                      String        @unique // Agency contact email
+  prefix                     String        @unique
+  businessType               String
+  natureOfBusiness           String
+  legalBusinessName          String?
+  businessRegistrationNumber String?
+  phoneNumber                String?
+  website                    String?
+  address                    String?
+  country                    String?
+  description                String?
+  logo                       String? // URL to agency logo
+  status                     AgencyStatus  @default(PENDING)
+  emailVerified              Boolean       @default(false)
+  kycDocuments               KycDocument[]
   // Add fields for specific services (flights, hotels) if needed
-  flightsEnabled Boolean       @default(false)
-  hotelsEnabled  Boolean       @default(false)
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  flightsEnabled             Boolean       @default(false)
+  hotelsEnabled              Boolean       @default(false)
+  createdAt                  DateTime      @default(now())
+  updatedAt                  DateTime      @updatedAt
   // user           User
-  BankDetails    BankDetails[]
-  userId         String        @db.ObjectId
+  BankDetails                BankDetails[]
+  agencyOwner                User          @relation(fields: [agencyOwnerId], references: [id])
+  agencyOwnerId              String
 }
 
 model KycDocument {
-  id         String          @id @default(cuid()) @map("_id")
-  agencyId   String
-  agency     Agency          @relation(fields: [agencyId], references: [id])
-  type       KycDocumentType
-  fileUrl    String // URL to the uploaded document
-  verified   Boolean         @default(false)
+  id             String          @id @default(cuid()) @map("_id")
+  agencyId       String?
+  agency         Agency?         @relation(fields: [agencyId], references: [id])
+  user           User?           @relation(fields: [userId], references: [id])
+  type           KycDocumentType
+  documentType   String
+  documentNumber String?
+
+  fileUrl    String? // URL to the uploaded document
+  verified   Boolean   @default(false)
   verifiedAt DateTime? // Date and time of verification 
+  userId     String?
 }
 
 model BankDetails {

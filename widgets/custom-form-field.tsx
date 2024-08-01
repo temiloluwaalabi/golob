@@ -3,6 +3,7 @@
 import { FormFieldTypes } from "@/components/form/login-form";
 import {
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -33,7 +34,9 @@ interface CustomFormFieldProps {
   inputClassName?: string;
   labelClassName?: string;
   changeSelectValue?: (field: string) => void;
+  onInputKeyDown?: (e: any) => void;
   name: string;
+  formDescription?: string;
   label?: string;
   floatLabel?: boolean;
   inputType?: string;
@@ -57,18 +60,26 @@ const RenderInput = ({ field, formFields }: Props) => {
   switch (formFields.fieldType) {
     case FormFieldTypes.INPUT:
       return (
-        <FormControl>
-          <Input
-            disabled={formFields.disabled}
-            placeholder={formFields.placeholder}
-            type={formFields.inputType}
-            className={cn(
-              "!bg-transparent !border-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:!ring-offset-0 ",
-              formFields.inputClassName
-            )}
-            {...field}
-          />
-        </FormControl>
+        <>
+          <FormControl>
+            <Input
+              disabled={formFields.disabled}
+              placeholder={formFields.placeholder}
+              onKeyDown={(e) => {
+                if (formFields.onInputKeyDown) {
+                  formFields.onInputKeyDown(e);
+                }
+              }}
+              type={formFields.inputType}
+              className={cn(
+                "!bg-transparent !border-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:!ring-offset-0 ",
+                formFields.inputClassName
+              )}
+              {...field}
+            />
+          </FormControl>
+          {formFields.children}
+        </>
       );
 
     case FormFieldTypes.PASSWORD:
@@ -193,6 +204,9 @@ const CustomFormField = (props: CustomFormFieldProps) => {
               )}
             <RenderInput field={field} formFields={props} />
           </div>
+          {props.formDescription && (
+            <FormDescription>{props.formDescription}</FormDescription>
+          )}
           <FormMessage />
         </FormItem>
       )}

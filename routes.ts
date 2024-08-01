@@ -10,6 +10,7 @@ export const guestRoutes = [
   "/auth/reset-password",
   "/auth/sign-up",
   "/auth/verify-code",
+  "/api/google/gemini",
   "/api/uploadthing",
   "/auth/error",
   "/",

@@ -1,4 +1,5 @@
 "use client";
+import * as z from "zod";
 import { AgencyPreOnboardingFinal } from "@/components/onboarding/agency/agency-pre-step-five";
 import { AgencyPreOnboardingStepFour } from "@/components/onboarding/agency/agency-pre-step-four";
 import { AgencyPreOnboardingStepOne } from "@/components/onboarding/agency/agency-pre-step-one";
@@ -8,16 +9,28 @@ import ClientOnly from "@/components/shared/client-only";
 import HorizontalStepper from "@/components/shared/horizontal-stepper";
 import ProgressBarWithButtons from "@/components/shared/progress-bar-with-buttons";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useCurrentUser } from "@/hooks/use-current-user";
 import { atom, useAtom } from "jotai";
-import { atomWithReset } from "jotai/utils";
+import { atomWithReset, atomWithStorage } from "jotai/utils";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { GeneralPreOnboardingSchema } from "@/lib/validations";
+
 interface PersonalDetails {
   firstName: string;
   lastName: string;
   email: string;
   phoneNumber: string;
   password: string;
-  passport: string;
+  // passport: string;
   confirmPassword: string;
 }
 interface PersonalDetailsKYC {
@@ -36,7 +49,14 @@ interface PersonalAddress {
   addressLineTwo?: string;
   city: string;
   state: string;
-  proofOfAddress: string;
+  addressProofType: string;
+
+  proofOfAddress: {
+    name: string;
+    url: string;
+    size: number;
+    key?: string;
+  }[];
 }
 interface AgencyDetails {
   agencyName: string;
@@ -60,13 +80,55 @@ interface AgencyDetails {
 
 // Personal Address
 export const currentStepAtom = atom(1);
+
+export const initialPreOnboardingData: z.infer<
+  typeof GeneralPreOnboardingSchema
+> = {
+  country: "",
+  identificationType: "",
+  identificationNumber: "",
+  docUrl: [
+    {
+      name: "",
+      url: "",
+      size: 0,
+      key: "" || undefined,
+    },
+  ],
+  addressLineOne: "",
+  addressLineTwo: "" || undefined,
+  city: "",
+  state: "",
+  addressProofType: "",
+
+  proofOfAddress: [
+    {
+      name: "",
+      url: "",
+      size: 0,
+      key: "" || undefined,
+    },
+  ],
+  agencyName: "",
+  legalBusinessName: "" || undefined,
+  rcNumber: "" || undefined,
+  agencyEmail: "",
+  agencyUniquePrefix: "",
+  businessType: "",
+  natureOfBusiness: "",
+};
+
+export const PreOnboardingData = atomWithStorage<
+  z.infer<typeof GeneralPreOnboardingSchema>
+>("PreOnboardingData", initialPreOnboardingData);
+
 export const persoanlDetailsAtom = atom<PersonalDetails>({
   firstName: "",
   lastName: "",
   email: "",
   phoneNumber: "",
   password: "",
-  passport: "",
+  // passport: "",
   confirmPassword: "",
 });
 export const verifyPersonalDetailsKYCAtom = atom<PersonalDetailsKYC>({
@@ -87,7 +149,16 @@ export const verifyPersonalAddressAtom = atom<PersonalAddress>({
   addressLineTwo: "" || undefined,
   city: "",
   state: "",
-  proofOfAddress: "",
+  addressProofType: "",
+
+  proofOfAddress: [
+    {
+      name: "",
+      url: "",
+      size: 0,
+      key: "" || undefined,
+    },
+  ],
 });
 export const agencyDetailsAtom = atom<AgencyDetails>({
   agencyName: "",
@@ -169,112 +240,169 @@ export const agencyPreOnboardingTotalSteps = Object.keys(
 ).length;
 export const AgencyPreOnboardingMultiStep = () => {
   const [step] = useAtom(AgencyPreOnboardingAtom);
+  const [openDialog, setOpenDialog] = useState(false);
   const Component = MAP_STEP_TO_COMPONENT[step];
   const { goToPreviousStep, goToNextStep } = useAgencyPeOnboardingAtom();
+  const user = useCurrentUser();
+  const router = useRouter();
 
+  useEffect(() => {
+    if (!user?.id) {
+      setOpenDialog(true);
+    }
+  }, [user?.id]);
   // const componentProps = {
   //   clientUser: any
   // }
   return (
-    <div className="h-fit bg-white shadow rounded-[10px] p-2 grid grid-cols-12 gap-2 w-full lg:w-[1000px]">
-      <div className="bg-[#fcfcfc] border flex flex-col justify-between rounded-[10px] col-span-8 py-8 px-6 w-full">
-        <HorizontalStepper
-          currentStep={step}
-          totalSteps={agencyPreOnboardingTotalSteps}
-        />
-        <ClientOnly>
-          <Component />
-        </ClientOnly>
-        {/* <ProgressBarWithButtons
-          currentStep={step}
-          totalSteps={agencyPreOnboardingTotalSteps}
-          onBack={goToPreviousStep}
-          onContinue={goToNextStep}
-          isLastStep={step === agencyPreOnboardingTotalSteps - 1}
-        /> */}
-        {/* <div>
+    <div className="w-full flex items-center justify-center">
+      <div className="h-fit bg-white shadow rounded-[10px] p-2 grid grid-cols-12 gap-2 w-full lg:w-[1000px]">
+        <div className="bg-[#fcfcfc] border flex flex-col justify-between rounded-[10px] col-span-8 py-8 px-6 w-full">
+          <HorizontalStepper
+            currentStep={step}
+            totalSteps={agencyPreOnboardingTotalSteps}
+          />
+          <ClientOnly>
+            <Component />
+          </ClientOnly>
+          {/* <ProgressBarWithButtons
+            currentStep={step}
+            totalSteps={agencyPreOnboardingTotalSteps}
+            onBack={goToPreviousStep}
+            onContinue={goToNextStep}
+            isLastStep={step === agencyPreOnboardingTotalSteps - 1}
+          /> */}
+          {/* <div>
             <h3 className="text-xl font-bold">Personal Information</h3>
             <p className="text-sm font-normal">
               Fill out these details to create your account
             </p>
           </div>
           <AgencyPersonalInformation /> */}
-        {/* <h2>Agency Essentials</h2>
+          {/* <h2>Agency Essentials</h2>
           <h3>KYC Documents</h3> */}
-      </div>
-      <div className="bg-white border rounded-[10px] flex flex-col gap-4 col-span-4 py-8 px-6 w-full">
-        <div className="flex items-center gap-4 ">
-          <div className="">
-            <div className="size-12 rounded-full flex items-center justify-center bg-primary text-white">
-              <h1 className="text-lg font-bold">1</h1>
+        </div>
+        <div className="bg-white border rounded-[10px] flex flex-col gap-4 col-span-4 py-8 px-6 w-full">
+          <div className="flex items-center gap-4 ">
+            <div className="">
+              <div className="size-12 rounded-full flex items-center justify-center bg-primary text-white">
+                <h1 className="text-lg font-bold">1</h1>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <h5 className="text-sm font-semibold">Create your account</h5>
+              <p className="text-xs font-normal">
+                Fill out these details to create your account
+              </p>{" "}
             </div>
           </div>
-          <div className="space-y-1">
-            <h5 className="text-sm font-semibold">Create your account</h5>
-            <p className="text-xs font-normal">
-              Fill out these details to create your account
-            </p>{" "}
-          </div>
-        </div>
-        <div className="flex items-center gap-4 ">
-          <div className="">
-            <div className="size-12 rounded-full flex items-center justify-center bg-primary text-white">
-              <h1 className="text-lg font-bold">2</h1>
+          <div className="flex items-center gap-4 ">
+            <div className="">
+              <div className="size-12 rounded-full flex items-center justify-center bg-primary text-white">
+                <h1 className="text-lg font-bold">2</h1>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <h5 className="text-sm font-semibold">Verify your identity</h5>
+              <p className="text-xs font-normal">
+                Fill and upload a valid means of identification
+              </p>{" "}
             </div>
           </div>
-          <div className="space-y-1">
-            <h5 className="text-sm font-semibold">Verify your identity</h5>
-            <p className="text-xs font-normal">
-              Fill and upload a valid means of identification
-            </p>{" "}
-          </div>
-        </div>
-        <div className="flex items-center gap-4 ">
-          <div className="">
-            <div className="size-12 rounded-full flex items-center justify-center bg-primary text-white">
-              <h1 className="text-lg font-bold">3</h1>
+          <div className="flex items-center gap-4 ">
+            <div className="">
+              <div className="size-12 rounded-full flex items-center justify-center bg-primary text-white">
+                <h1 className="text-lg font-bold">3</h1>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <h5 className="text-sm font-semibold">
+                Verify your home address
+              </h5>
+              <p className="text-xs font-normal">
+                Fill out your home address details and upload a proof of address
+              </p>{" "}
             </div>
           </div>
-          <div className="space-y-1">
-            <h5 className="text-sm font-semibold">Verify your home address</h5>
-            <p className="text-xs font-normal">
-              Fill out your home address details and upload a proof of address
-            </p>{" "}
-          </div>
-        </div>
-        <div className="flex items-center gap-4 ">
-          <div className="">
-            <div className="size-12 rounded-full flex items-center justify-center bg-primary text-white">
-              <h1 className="text-lg font-bold">4</h1>
+          <div className="flex items-center gap-4 ">
+            <div className="">
+              <div className="size-12 rounded-full flex items-center justify-center bg-primary text-white">
+                <h1 className="text-lg font-bold">4</h1>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <h5 className="text-sm font-semibold">Agency Essentials</h5>
+              <p className="text-xs font-normal">
+                Fill out these basic agency details
+              </p>{" "}
             </div>
           </div>
-          <div className="space-y-1">
-            <h5 className="text-sm font-semibold">Agency Essentials</h5>
-            <p className="text-xs font-normal">
-              Fill out these basic agency details
-            </p>{" "}
-          </div>
-        </div>
-        <div className="flex items-center gap-4 ">
-          <div className="">
-            <div className="size-12 rounded-full flex items-center justify-center bg-primary text-white">
-              <h1 className="text-lg font-bold">5</h1>
+          <div className="flex items-center gap-4 ">
+            <div className="">
+              <div className="size-12 rounded-full flex items-center justify-center bg-primary text-white">
+                <h1 className="text-lg font-bold">5</h1>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <h5 className="text-sm font-semibold">Review</h5>
+              <p className="text-xs font-normal">
+                Fill out these details to create your account
+              </p>{" "}
             </div>
           </div>
-          <div className="space-y-1">
-            <h5 className="text-sm font-semibold">Review</h5>
+          <div className="flex flex-col gap-2 mt-auto">
+            <h4 className="text-sm font-bold">Need Help?</h4>
             <p className="text-xs font-normal">
-              Fill out these details to create your account
-            </p>{" "}
+              Get to know how to setup your agency startup on Golobe
+            </p>
+            <Button variant={"outline"}>Contact Us</Button>
           </div>
         </div>
-        <div className="flex flex-col gap-2 mt-auto">
-          <h4 className="text-sm font-bold">Need Help?</h4>
-          <p className="text-xs font-normal">
-            Get to know how to setup your agency startup on Golobe
-          </p>
-          <Button variant={"outline"}>Contact Us</Button>
-        </div>
+        <ClientOnly>
+          <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+            <DialogContent>
+              <Card className=" bg-white p-0 rounded-[10px] border-none bg-transparent outline-none focus-visible:ring-0 focus-visible:!ring-offset-0 shadow-none flex flex-col h-full  gap-8">
+                <CardHeader className="p-0">
+                  <CardTitle>
+                    <div className="flex justify-between items-center">
+                      <h3 className="text-xl font-bold">Please Login</h3>
+                      {/* <Button
+              variant={"link"}
+              className="flex items-center"
+              onClick={() => router.push("/auth/login")}
+            >
+              Login <ChevronRight className="size-4 ms-2" />
+            </Button> */}
+                    </div>
+                  </CardTitle>
+                  <CardDescription>
+                    <p className="text-sm font-normal">
+                      You&apos;ve to be logged into your account to start the
+                      agency onboarding process, please visit the login page to
+                      access your account or the registration page to create
+                      your account
+                    </p>
+                  </CardDescription>
+                </CardHeader>
+                <CardFooter className="p-0 flex items-center gap-4 justify-between">
+                  <Button
+                    className="w-full"
+                    variant={"outline"}
+                    onClick={() => router.push("/auth/login")}
+                  >
+                    Login
+                  </Button>
+                  <Button
+                    className="w-full hover:bg-primary-blackishGreen"
+                    onClick={() => router.push("/auth/sign-up")}
+                  >
+                    Sign Up
+                  </Button>
+                </CardFooter>
+              </Card>
+            </DialogContent>
+          </Dialog>
+        </ClientOnly>
       </div>
     </div>
   );
