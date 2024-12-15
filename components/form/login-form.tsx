@@ -28,7 +28,7 @@ import { TriangleAlertIcon } from "lucide-react";
 import { getAccountByUserId, getUserByEmail } from "@/data/user";
 import { User } from "@prisma/client";
 import AccountModal from "../cards/account-modal";
-import { useCurrentAuthStore } from "@/store/authStore";
+import { useAuthStore } from "@/store/authStore";
 
 export enum FormFieldTypes {
   INPUT = "input",
@@ -48,7 +48,9 @@ const LoginForm = () => {
   const [error, setError] = useState("");
   const [user, setUser] = useState<User | null | undefined>();
   // const [showAccoumtForm, setShowAccoumtForm] = useState(false);
-  const { showAccountForm, setShowAccountForm } = useCurrentAuthStore();
+  const showAccountForm = useAuthStore((state) => state.showAccountForm);
+  const setShowAccountForm = useAuthStore((state) => state.setShowAccountForm);
+
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const { toast } = useToast();

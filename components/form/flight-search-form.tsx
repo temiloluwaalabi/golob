@@ -84,17 +84,7 @@ export const FlightSearchForm = (props: Props) => {
   const handleSubmit = async (values: z.infer<typeof FligthSearchSchema>) => {
     console.log(values);
   };
-  // console.log(form.getValues("passengers.adults"));
-  // console.log("TakeOff", form.getValues("takeOff"));
-  // console.log("cabinType", form.getValues("tripType"));
-  // console.log("destination", form.getValues("destination"));
-  // console.log("departure", form.getValues("departureDate"));
-  // console.log("arrival", form.getValues("arrivalDate"));
-  // console.log("adults", form.getValues("passengers.adults"));
-  // console.log("tenn", form.getValues("passengers.teenagers"));
-  // console.log("infants", form.getValues("passengers.infants"));
-  // console.log("class", form.getValues("passengers.class"));
-  // console.log("TakeOff", form.getValues("takeOff"));
+
   return (
     <Form {...form}>
       <form

@@ -9,16 +9,17 @@ interface AuthState {
 }
 
 export const currentUserAtom = atom<User | null>(null);
+
 export const useAuthStore = create<AuthState>((set) => ({
   showAccountForm: false,
   setShowAccountForm: (show) => set({ showAccountForm: show }),
 }));
 
-export const useCurrentAuthStore = (): AuthState => {
-  const { showAccountForm, setShowAccountForm } = useAuthStore((state) => ({
-    showAccountForm: state.showAccountForm,
-    setShowAccountForm: state.setShowAccountForm,
-  }));
+// export const useCurrentAuthStore = (): AuthState => {
+//   const { showAccountForm, setShowAccountForm } = useAuthStore((state) => ({
+//     showAccountForm: state.showAccountForm,
+//     setShowAccountForm: state.setShowAccountForm,
+//   }));
 
-  return { showAccountForm, setShowAccountForm };
-};
+//   return { showAccountForm, setShowAccountForm };
+// };

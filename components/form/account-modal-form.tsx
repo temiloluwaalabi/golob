@@ -16,7 +16,7 @@ import GoogleIcon from "../icons/google";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
-import { useCurrentAuthStore } from "@/store/authStore";
+import { useAuthStore } from "@/store/authStore";
 
 type Props = {
   user: User | null | undefined;
@@ -26,7 +26,8 @@ export const AccountModalForm = ({ user, account }: Props) => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const callbackUrl = searchParams.get("redirectTo") ?? DEFAULT_LOGIN_REDIRECT;
-  const { setShowAccountForm } = useCurrentAuthStore();
+  const setShowAccountForm = useAuthStore((state) => state.setShowAccountForm);
+
   const handleClick = (
     provider: "google" | "github" | "facebook" | "apple"
   ) => {
