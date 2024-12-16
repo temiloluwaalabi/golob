@@ -28,23 +28,28 @@ export const ReviewsCard = (props: Props) => {
   const fullStars = Math.floor(props.stars);
   const hasHalfStar = props.stars % 1 !== 0;
 
-  const starsArray = [];
+  // Generate stars array outside of JSX rendering
+  const generateStars = () => {
+    const stars = [];
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(
+        <Star key={i} className="size-6 text-orange-300 mr-2" fill="#fdba74" />
+      );
+    }
+    if (hasHalfStar) {
+      stars.push(
+        <StarHalf
+          key={fullStars}
+          className="size-6 text-orange-300 mr-2"
+          fill="#fdba74"
+        />
+      );
+    }
+    return stars;
+  };
 
-  for (let i = 0; i < fullStars; i++) {
-    starsArray.push(
-      <Star key={i} className="size-6 text-orange-300 mr-2" fill="#fdba74" />
-    );
-  }
+  const starsArray = generateStars();
 
-  if (hasHalfStar) {
-    starsArray.push(
-      <StarHalf
-        key={fullStars}
-        className="size-6 text-orange-300 mr-2"
-        fill="#fdba74"
-      />
-    );
-  }
   const words = props.description.split(" ");
   const trucatedDescription = showFullDescription
     ? props.description
