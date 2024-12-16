@@ -1,7 +1,6 @@
 "use client";
 import { endsWith, isEmpty } from "lodash";
 import { useCallback, useState } from "react";
-import { useDropzone } from "@uploadthing/react/hooks";
 import { generateClientDropzoneAccept } from "uploadthing/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
@@ -16,7 +15,11 @@ import { ENDPOINTS } from "./upload-zone";
 import { Progress } from "../ui/progress";
 import { interval } from "date-fns";
 import { UploadThingError } from "uploadthing/server";
-import { SerializedUploadThingError } from "@uploadthing/shared";
+import {
+  generatePermittedFileTypes,
+  SerializedUploadThingError,
+} from "@uploadthing/shared";
+import { useDropzone } from "@uploadthing/react";
 interface UploadZoneProps {
   label?: string;
   field?: any;
@@ -154,102 +157,101 @@ const UploadZone = ({
   //   };
   const { toast } = useToast();
 
-  const { startUpload, permittedFileInfo, isUploading } = useUploadThing(
-    endpoint,
-    {
-      onClientUploadComplete: (
-        res: ClientUploadedFileData<any>[] | undefined
-      ) => {
-        // console.log("res", res);
-        if (setValue) {
-          const currentValue = getValues(name);
-          // res?.forEach((r) => {
-          //   const file = files.find((f) => f.name === r.name)
-          //   if(file){
-          //     file.status = "success"
-          //   }
-          // })
-          const respondedUrls =
-            res?.map((r) => ({
-              name: r.name,
-              size: r.size,
-              url: r.url,
-              key: r.key,
-            })) || [];
-          if (!currentValue || currentValue.length === 0) {
-            setValue(name, respondedUrls);
-          } else {
-            setValue(name, [...currentValue, ...respondedUrls]);
-          }
-
-          setFiles([]);
-          // const respondedUrls = res?.map((r) => r.url);
-        }
-        // console.log("values from uploadzone", getValues(name));
-        toast({
-          description: "Package Images Uploaded",
-        });
-      },
-      onBeforeUploadBegin: (files) => {
-        return files.map(
-          (f) =>
-            new File([f], `renamed-${fileNamePrefix}` + f.name, {
-              type: f.type,
-            })
-        );
-      },
-      onUploadBegin: (fileName) => {
-        console.log(fileName);
-      },
-      onUploadError: (error: Error) => {
-        if (error instanceof UploadThingError) {
-          console.log(error.code);
-          console.log(error.data);
-          switch (error.code) {
-            case "TOO_LARGE":
-              toast({
-                description: "File size exceeds the allowed limit.",
-              });
-              break;
-            case "TOO_MANY_FILES":
-              toast({
-                description: "You have exceeded the allowed number of files.",
-              });
-              break;
-            case "UPLOAD_FAILED":
-              toast({
-                description:
-                  "An error occurred while uploading. Please try again.",
-              });
-              break;
-            default:
-              toast({
-                description: "An unexpected error occurred.",
-              });
-              console.error("Detailed error:", error); // Log the error for debugging
-          }
+  const { startUpload, routeConfig, isUploading } = useUploadThing(endpoint, {
+    onClientUploadComplete: (
+      res: ClientUploadedFileData<any>[] | undefined
+    ) => {
+      // console.log("res", res);
+      if (setValue) {
+        const currentValue = getValues(name);
+        // res?.forEach((r) => {
+        //   const file = files.find((f) => f.name === r.name)
+        //   if(file){
+        //     file.status = "success"
+        //   }
+        // })
+        const respondedUrls =
+          res?.map((r) => ({
+            name: r.name,
+            size: r.size,
+            url: r.url,
+            key: r.key,
+          })) || [];
+        if (!currentValue || currentValue.length === 0) {
+          setValue(name, respondedUrls);
         } else {
-          // Handle generic errors
-          toast({
-            description: "An error occurred while uploading. Please try again.",
-          });
-          console.error("Detailed error:", error);
+          setValue(name, [...currentValue, ...respondedUrls]);
         }
 
-        // toast({
-        //   description: `${error.message}`,
-        // });
-      },
-    }
-  );
+        setFiles([]);
+        // const respondedUrls = res?.map((r) => r.url);
+      }
+      // console.log("values from uploadzone", getValues(name));
+      toast({
+        description: "Package Images Uploaded",
+      });
+    },
+    onBeforeUploadBegin: (files) => {
+      return files.map(
+        (f) =>
+          new File([f], `renamed-${fileNamePrefix}` + f.name, {
+            type: f.type,
+          })
+      );
+    },
+    onUploadBegin: (fileName) => {
+      console.log(fileName);
+    },
+    onUploadError: (error: Error) => {
+      if (error instanceof UploadThingError) {
+        console.log(error.code);
+        console.log(error.data);
+        switch (error.code) {
+          case "TOO_LARGE":
+            toast({
+              description: "File size exceeds the allowed limit.",
+            });
+            break;
+          case "TOO_MANY_FILES":
+            toast({
+              description: "You have exceeded the allowed number of files.",
+            });
+            break;
+          case "UPLOAD_FAILED":
+            toast({
+              description:
+                "An error occurred while uploading. Please try again.",
+            });
+            break;
+          default:
+            toast({
+              description: "An unexpected error occurred.",
+            });
+            console.error("Detailed error:", error); // Log the error for debugging
+        }
+      } else {
+        // Handle generic errors
+        toast({
+          description: "An error occurred while uploading. Please try again.",
+        });
+        console.error("Detailed error:", error);
+      }
 
-  const fileTypes = permittedFileInfo?.config
-    ? Object.keys(permittedFileInfo?.config)
-    : [];
+      // toast({
+      //   description: `${error.message}`,
+      // });
+    },
+  });
+
+  const fileTypes = routeConfig ? Object.keys(routeConfig) : [];
 
   const { getInputProps, getRootProps } = useDropzone({
     onDrop,
-    accept: fileTypes ? generateClientDropzoneAccept(fileTypes) : undefined,
+    accept: fileTypes
+      ? generateClientDropzoneAccept(
+          generatePermittedFileTypes(routeConfig).fileTypes
+        )
+      : undefined,
   });
 
   return (
