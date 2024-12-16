@@ -2,8 +2,10 @@
 import React, { useCallback, useState } from "react";
 import { FileWithPath } from "react-dropzone";
 import { isEmpty, size } from "lodash";
-import { useDropzone } from "@uploadthing/react/hooks";
-import { generateClientDropzoneAccept } from "uploadthing/client";
+import {
+  generateClientDropzoneAccept,
+  generatePermittedFileTypes,
+} from "uploadthing/client";
 import { formatBytes, useUploadThing } from "@/lib/uploadthing";
 import { ClientUploadedFileData } from "uploadthing/types";
 import { toast } from "sonner";
@@ -14,6 +16,7 @@ import UploadIcon from "../icons/upload";
 import { cn } from "@/lib/utils";
 import { Loader, Loader2, Trash, X } from "lucide-react";
 import Image from "next/image";
+import { useDropzone } from "@uploadthing/react";
 
 export interface FileType extends File {
   preview?: string;
@@ -129,7 +132,7 @@ export const UploadZone = (props: Props) => {
     }
   };
 
-  const { startUpload, permittedFileInfo, isUploading } = useUploadThing(
+  const { startUpload, routeConfig, isUploading } = useUploadThing(
     props.endpoint,
     {
       onClientUploadComplete: (
@@ -194,13 +197,15 @@ export const UploadZone = (props: Props) => {
     }
   );
 
-  const fileTypes = permittedFileInfo?.config
-    ? Object.keys(permittedFileInfo.config)
-    : [];
+  const fileTypes = routeConfig ? Object.keys(routeConfig) : [];
 
   const { getInputProps, getRootProps } = useDropzone({
     onDrop,
-    accept: fileTypes ? generateClientDropzoneAccept(fileTypes) : undefined,
+    accept: fileTypes
+      ? generateClientDropzoneAccept(
+          generatePermittedFileTypes(routeConfig).fileTypes
+        )
+      : undefined,
     maxFiles: props.maxFiles || 10,
   });
   const renderFileNewStatus = (file: FileType) => {
