@@ -8,10 +8,11 @@ import { categories, places, reviews } from "@/constants";
 import { currentUser } from "@/lib/auth";
 import { User } from "@/types";
 import Image from "next/image";
+import { fetchCountriesByRegionAndSubRegions } from "./actions/countries.actions";
 
 export default async function Home() {
   const user: User | null = await currentUser();
-
+  const countries = await fetchCountriesByRegionAndSubRegions();
   return (
     <>
       <section
@@ -46,7 +47,7 @@ export default async function Home() {
       </section>
       <section className=" px-[30px] md:px-[70px] lg:px-[104px] z-30">
         <div className="translate-y-[-20%] sm:translate-y-[-25%] md:translate-y-[-40%] lg:translate-y-[-50%] z-30">
-          <HomeSearch />
+          <HomeSearch countries={countries} />
         </div>
       </section>
       <section className="mt-[-80px] z-40 pb-[40px] px-[30px] flex flex-col gap-10 md:px-[70px] lg:px-[104px] ">

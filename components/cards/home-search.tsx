@@ -7,7 +7,10 @@ import AirplaceIcon from "../icons/airplane";
 import StayIcon from "../icons/stay";
 import { FlightSearchForm } from "../form/flight-search-form";
 import ClientOnly from "../shared/client-only";
-type Props = {};
+import { RegionCountry } from "@/types";
+type Props = {
+  countries: RegionCountry[];
+};
 export const HomeSearch = (props: Props) => {
   return (
     <Tabs
@@ -38,7 +41,7 @@ export const HomeSearch = (props: Props) => {
       <TabsContent value="flight">
         <div className="py-3 lg:py-6">
           <ClientOnly>
-            <FlightSearchForm />
+            <FlightSearchForm countries={props.countries} />
           </ClientOnly>
         </div>
       </TabsContent>

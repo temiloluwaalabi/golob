@@ -50,3 +50,59 @@ type CountryKYC = {
 // export const kycDocs: CountryKYC[] = [
 //   // your data here
 // ];
+
+export interface Country {
+  name: string;
+  // tld: string;
+  code: string;
+  // ccn3: string;
+  capital: string;
+  region: string;
+  subRegion: string;
+  continents: string[];
+  flag: string;
+  flagAlt: string;
+}
+
+export interface RegionCountry {
+  region: string;
+  countries: Country[];
+}
+
+export enum AfricaSubregion {
+  EasternAfrica = "Eastern Africa",
+  MiddleAfrica = "Middle Africa",
+  NorthernAfrica = "Northern Africa",
+  SouthernAfrica = "Southern Africa",
+  WesternAfrica = "Western Africa",
+}
+export enum EuropeSubregion {
+  CentralEurope = "Central Europe",
+  EasternEurope = "Eastern Europe",
+  NorthernEurope = "Northern Europe",
+  SoutheastEurope = "Southeast Europe",
+  SouthernEurope = "Southern Europe",
+  WesternEurope = "Western Europe",
+}
+export enum OceaniaSubregion {
+  AustraliaAndNewZealand = "Australia and New Zealand",
+  Melanesia = "Melanesia",
+  Micronesia = "Micronesia",
+  Polynesia = "Polynesia",
+}
+export enum Continent {
+  NorthAmerica = "North America",
+  Oceania = "Oceania",
+  SouthAmerica = "South America",
+  America = "America",
+  Africa = "Africa",
+  Europe = "Europe",
+  Asia = "Asia",
+}
+
+export enum AmericaSubregion {
+  Caribbean = "Caribbean",
+  CentralAmerica = "Central America",
+  NorthAmerica = "North America",
+  SouthAmerica = "South America",
+}

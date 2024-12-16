@@ -46,7 +46,7 @@
     "nextjs-toploader": "^3.7.15",
     "query-string": "^9.1.1",
     "react": "^19",
-    "react-day-picker": "^9.4.1",
+    "react-day-picker": "^8.10.1",
     "react-dom": "^19",
     "react-dropzone": "^14.3.5",
     "react-hook-form": "^7.54.0",

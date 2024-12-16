@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "../ui/form";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { ArrowLeftRight, CalendarIcon, Plus, Send } from "lucide-react";
+import { ArrowLeftRight, CalendarIcon, Plus, Search, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { cabinWay, countriesDest, tripWay } from "@/constants";
@@ -28,8 +28,22 @@ import { DateRange } from "react-day-picker";
 import { addDays, format } from "date-fns";
 import { Calendar } from "../ui/calendar";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
-type Props = {};
+import { RegionCountry } from "@/types";
+import statesData from "@/constants/states.json"; // Import your states.json
+const continents = [
+  { name: "Africa", code: "AF", countries: ["NG", "GH", "KE", "ZA"] }, // Example popular countries (country codes)
+  { name: "Asia", code: "AS", countries: ["CN", "IN", "JP", "KR"] },
+  { name: "Europe", code: "EU", countries: ["GB", "FR", "DE", "IT"] },
+  { name: "North America", code: "NA", countries: ["US", "CA", "MX", null] }, // Example, replace with actual data
+
+  // ... other continents
+];
+type Props = {
+  countries: RegionCountry[];
+};
 export const FlightSearchForm = (props: Props) => {
+  const [searchQuery, setSearchQuery] = React.useState<string>("");
+
   const [isPending, startTransition] = React.useTransition();
   const [takeOff, setTakeOff] = useState("");
   const [destination, setDestination] = useState("");
@@ -37,6 +51,7 @@ export const FlightSearchForm = (props: Props) => {
   const [flightClass, setFlightClass] = useState("");
   const [openLeavingFrom, setOpenLeavingFrom] = useState(false);
   const [openGoingTo, setOpenGoingTo] = useState(false);
+  const [currentLocation, setCurrentLocation] = useState("");
 
   const [openPassengers, setOpenPassengers] = useState(false);
   const [openDateCalendar, setOpenDateCalendar] = useState(false);
@@ -85,6 +100,79 @@ export const FlightSearchForm = (props: Props) => {
     console.log(values);
   };
 
+  React.useEffect(() => {
+    const getCurrentLocation = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const { latitude, longitude } = position.coords;
+
+            // Use a reverse geocoding API to get location details (city, country, etc.)
+            fetch(
+              `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`
+            )
+              .then((res) => res.json())
+              .then((data) => {
+                // Example: extract city/town or village name
+                const city =
+                  data.address?.city ||
+                  data.address?.town ||
+                  data.address?.village;
+                setCurrentLocation(city || "Unknown Location");
+              })
+              .catch((error) => {
+                console.error("Error getting location:", error);
+                setCurrentLocation("Unknown Location");
+              });
+          },
+          (error) => {
+            console.error("Error getting location:", error);
+            setCurrentLocation("Location access denied."); // Or handle the error as you see fit
+          }
+        );
+      } else {
+        setCurrentLocation("Geolocation not supported by browser.");
+      }
+    };
+
+    getCurrentLocation(); // Call the function initially
+  }, []); // Empty dependency array means this effect runs only once (on mount)
+
+  const filteredStates = searchQuery
+    ? statesData.filter((state) =>
+        state.country_name.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : [];
+
+  const filteredCountries =
+    filteredStates.length > 0
+      ? [...new Set(filteredStates.map((state) => state.country_name))]
+      : [];
+
+  const getPopularStates = (continentCode: string) => {
+    const continent = continents.find((c) => c.code === continentCode);
+
+    if (!continent) {
+      return []; // Handle case where continent is not found
+    }
+
+    let popularStates: any[] = [];
+
+    continent.countries.forEach((countryCode) => {
+      if (countryCode) {
+        // Check if countryCode is not null (e.g., for North America)
+        const countryStates = statesData.filter(
+          (state) => state.country_code === countryCode
+        );
+        const numPopularStates = Math.min(3, countryStates.length); // Get at most 3 popular states per country
+        const selectedStates = countryStates.slice(0, numPopularStates);
+        popularStates = popularStates.concat(selectedStates);
+      }
+    });
+
+    return popularStates;
+  };
+
   return (
     <Form {...form}>
       <form
@@ -129,33 +217,95 @@ export const FlightSearchForm = (props: Props) => {
                       sideOffset={3}
                       className="w-full max-w-[245px]  xs:max-w-[350px] sm:max-w-[350px] md:max-w-[420px] lg:max-w-[650px] p-0 my-3"
                     >
-                      <ScrollArea className="h-[350px] md:h-[420px] lg:h-full">
-                        {countriesDest.map((country, i) => (
-                          <Card
-                            key={country.continent}
-                            className="p-0 border-none shadow-none"
-                          >
-                            <CardHeader className="bg-light-800 text-14_medium font-medium text-primary-blackishGreen/40 rounded-ss-md rounded-se-md p-0 py-2 px-3">
-                              {country.continent}
-                            </CardHeader>
-                            <CardContent className="p-0 px-3 py-6">
-                              <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
-                                {country.cities.map((city) => (
-                                  <Badge
-                                    className="bg-light-700 font-light cursor-pointer hover:bg-light-800 text-black/80 rounded-md px-5 py-2 "
-                                    key={city}
-                                    onClick={() => {
-                                      handleCityClick(field.name, city);
-                                      setOpenLeavingFrom(false);
-                                    }}
-                                  >
-                                    {city}
-                                  </Badge>
-                                ))}
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
+                      <div className="p-2">
+                        <div className="relative flex h-12 w-full items-center rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors">
+                          <Search className="mr-2 size-4 shrink-0  opacity-50" />
+
+                          <Input
+                            placeholder="Leaving From..."
+                            value={searchQuery}
+                            onChange={(e) => {
+                              e.preventDefault();
+                              setSearchQuery(e.target.value);
+                            }}
+                            className="no-focus h-10 border-none p-0 shadow-none outline-none"
+                          />
+                        </div>
+                      </div>
+                      <ScrollArea className="h-[350px] md:h-[420px] lg:h-[500px]">
+                        {searchQuery && filteredCountries.length > 0 ? (
+                          filteredCountries.map((country_name) => (
+                            <Card
+                              key={country_name}
+                              className="p-0 border-none shadow-none"
+                            >
+                              <CardHeader className="bg-light-800 text-14_medium font-medium text-primary-blackishGreen/40 p-0 py-2 px-3">
+                                {country_name}
+                              </CardHeader>
+                              <CardContent className="p-0 px-2 py-2">
+                                <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
+                                  {filteredStates
+                                    .filter(
+                                      (s) => s.country_name === country_name
+                                    )
+
+                                    .map((city) => (
+                                      <Badge // Use Badge or any suitable component
+                                        key={city.id}
+                                        onClick={() =>
+                                          form.setValue("takeOff", city.name)
+                                        } // Pass the field name
+                                        className="bg-light-700 font-light cursor-pointer hover:bg-light-800 text-black/80 rounded-md px-5 py-2 m-2"
+                                      >
+                                        {city.name}
+                                      </Badge>
+                                    ))}
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))
+                        ) : (
+                          <>
+                            {currentLocation ? (
+                              <p>Current Location: {currentLocation}</p>
+                            ) : (
+                              <p>Getting current location...</p>
+                            )}{" "}
+                            {/* Replace with actual current location */}
+                            {continents.map((country, i) => (
+                              <Card
+                                key={country.code}
+                                className="p-0 border-none shadow-none"
+                              >
+                                <CardHeader className="bg-light-800 text-14_medium font-medium text-primary-blackishGreen/40 p-0 py-2 px-3">
+                                  {country.name}
+                                </CardHeader>
+                                <CardContent className="p-0 px-3 py-6">
+                                  <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
+                                    {getPopularStates(country.code).map(
+                                      (city) => (
+                                        <Badge
+                                          className="bg-light-700 font-light cursor-pointer hover:bg-light-800 text-black/80 rounded-md px-5 py-2 "
+                                          key={city.id}
+                                          onClick={() => {
+                                            handleCityClick(
+                                              field.name,
+                                              city.name
+                                            );
+                                            setOpenLeavingFrom(false);
+                                          }}
+                                        >
+                                          {city.name}
+                                        </Badge>
+                                      )
+                                    )}
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            ))}
+                          </>
+                        )}
+
                         <ScrollBar orientation={"vertical"} />
                       </ScrollArea>
                     </PopoverContent>
