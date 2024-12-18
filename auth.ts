@@ -25,28 +25,30 @@ export const {
   signIn,
   signOut,
 } = NextAuth({
+  debug: true,
   pages: {
     signIn: "/auth/login",
     error: "/auth/error",
   },
   events: {
     async linkAccount({ user }) {
-      await db.user.update({
-        where: {
-          id: user.id,
-        },
-        data: {
-          emailVerified: new Date(),
-        },
-      });
+      db.user
+        .update({
+          where: {
+            id: user.id,
+          },
+          data: {
+            emailVerified: new Date(),
+          },
+        })
+        .catch((error) => console.error("Error linking account:", error));
     },
   },
   callbacks: {
     async signIn({ user, account }) {
+      // Allow OAuth sign-ins
+      if (account?.provider === "google") return true;
       try {
-        // Allow OAuth sign-ins
-        if (account?.provider !== "credentials") return true;
-
         const existingUser = await getUserByID(user.id!);
 
         // Add custom validation logic if needed, such as email verification
@@ -60,61 +62,92 @@ export const {
       }
     },
     async session({ session, token }) {
-      if (token.sub && session.user) {
-        session.user.id = token.sub;
+      if (token.sub) {
+        session.user = {
+          ...session.user,
+          id: token.sub,
+          role: token.role as UserRole,
+          isTwoFactorEnabled: token.isTwoFactorEnabled as boolean,
+          isOAuth: token.isOAuth as boolean,
+          name: token.name,
+          email: token.email!,
+          image: token.picture!,
+        };
       }
-      if (token.role && session.user) {
-        session.user.role = token.role as UserRole;
-      }
-      if (token.isTwoFactorEnabled && session.user) {
-        session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean;
-      }
+      // if (token.sub && session.user) {
+      //   session.user.id = token.sub;
+      // }
+      // if (token.role && session.user) {
+      //   session.user.role = token.role as UserRole;
+      // }
+      // if (token.isTwoFactorEnabled && session.user) {
+      //   session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean;
+      // }
 
-      if (session.user) {
-        session.user.name = token.name;
-        session.user.email = token.email as string;
-        session.user.isOAuth = token.isOAuth as boolean;
-        session.user.image = token.picture as string;
-      }
+      // if (session.user) {
+      //   session.user.name = token.name;
+      //   session.user.email = token.email as string;
+      //   session.user.isOAuth = token.isOAuth as boolean;
+      //   session.user.image = token.picture as string;
+      // }
       // console.log(session);
       // console.log(token);
       return session;
     },
     async jwt({ token }) {
       if (!token.sub) return token;
-
-      const existingUser = await getUserByID(token.sub);
-
-      if (!existingUser) return token;
-
-      const existingAccount = await getAccountByUserId(existingUser.id);
-
-      // Check if existingAccount is not null or undefined
-      if (existingAccount !== null && existingAccount !== undefined) {
-        token.isOAuth = true;
-      } else {
-        token.isOAuth = false;
+      try {
+        const user = await getUserByID(token.sub);
+        if (user) {
+          token = {
+            ...token,
+            name: user.name,
+            email: user.email,
+            picture: user.image,
+            role: user.role,
+            isTwoFactorEnabled: user.isTwoFactorEnabled,
+            isOAuth: !!(await getAccountByUserId(user.id)),
+          };
+        }
+        return token;
+      } catch (error) {
+        console.error("Error in jwt callback:", error);
+        return token;
       }
+      // const existingUser = await getUserByID(token.sub);
 
-      token.name = existingUser.name;
-      token.email = existingUser.email;
-      token.picture = existingUser.image;
-      token.role = existingUser.role;
-      token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled;
-      return token;
+      // if (!existingUser) return token;
+
+      // const existingAccount = await getAccountByUserId(existingUser.id);
+
+      // // Check if existingAccount is not null or undefined
+      // if (existingAccount !== null && existingAccount !== undefined) {
+      //   token.isOAuth = true;
+      // } else {
+      //   token.isOAuth = false;
+      // }
+
+      // token.name = existingUser.name;
+      // token.email = existingUser.email;
+      // token.picture = existingUser.image;
+      // token.role = existingUser.role;
+      // token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled;
+      // return token;
     },
-    authorized: () => {
-      return true;
-    },
+    // authorized: () => {
+    //   return true;
+    // },
     async redirect({ url, baseUrl }) {
-      const parsedUrl = new URL(url, baseUrl);
-      if (parsedUrl.searchParams.has("callbackUrl")) {
-        return `${baseUrl}${parsedUrl.searchParams.get("callbackUrl")}`;
-      }
-      if (parsedUrl.origin === baseUrl) {
-        return url;
-      }
-      return baseUrl;
+      return url.startsWith(baseUrl) ? url : baseUrl;
+
+      // const parsedUrl = new URL(url, baseUrl);
+      // if (parsedUrl.searchParams.has("callbackUrl")) {
+      //   return `${baseUrl}${parsedUrl.searchParams.get("callbackUrl")}`;
+      // }
+      // if (parsedUrl.origin === baseUrl) {
+      //   return url;
+      // }
+      // return baseUrl;
     },
   },
   adapter: PrismaAdapter(db),

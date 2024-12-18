@@ -22,6 +22,14 @@ export const getUserByID = async (id: string) => {
       where: {
         id,
       },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        image: true,
+        role: true,
+        isTwoFactorEnabled: true,
+      },
     });
 
     return user;

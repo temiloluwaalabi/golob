@@ -194,3 +194,18 @@ export const Logout = async () => {
   // Server stuffs
   await signOut();
 };
+
+export async function findOrCreateUser(googleUser: any) {
+  return await db.user.upsert({
+    where: { email: googleUser.email },
+    update: {
+      name: googleUser.name,
+      image: googleUser.picture,
+    },
+    create: {
+      email: googleUser.email,
+      name: googleUser.name,
+      image: googleUser.picture,
+    },
+  });
+}
