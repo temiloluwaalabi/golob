@@ -43,16 +43,21 @@ export const {
   },
   callbacks: {
     async signIn({ user, account }) {
-      console.log({ user, account });
+      try {
+        // Allow OAuth sign-ins
+        if (account?.provider !== "credentials") return true;
 
-      // allow oauth
-      if (account?.provider !== "credentials") return true;
+        const existingUser = await getUserByID(user.id!);
 
-      const existingUser = await getUserByID(user.id!);
+        // Add custom validation logic if needed, such as email verification
+        // Example: Reject if email is not verified
+        // if (!existingUser?.emailVerified) return false;
 
-      // if(!existingUser?.emailVerified) return false
-
-      return true;
+        return !!existingUser; // Only allow sign-in if the user exists
+      } catch (error) {
+        console.error("Error during sign-in callback:", error);
+        return false; // Deny sign-in on error
+      }
     },
     async session({ session, token }) {
       if (token.sub && session.user) {
@@ -98,9 +103,9 @@ export const {
       token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled;
       return token;
     },
-    // authorized: () => {
-    //   return true;
-    // },
+    authorized: () => {
+      return true;
+    },
     async redirect({ url, baseUrl }) {
       const parsedUrl = new URL(url, baseUrl);
       if (parsedUrl.searchParams.has("callbackUrl")) {
