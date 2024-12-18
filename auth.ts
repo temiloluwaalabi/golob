@@ -49,6 +49,7 @@ export const {
       // Allow OAuth sign-ins
       if (account?.provider === "google") return true;
       try {
+        console.log("getting user");
         const existingUser = await getUserByID(user.id!);
 
         // Add custom validation logic if needed, such as email verification
