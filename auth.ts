@@ -25,7 +25,10 @@ export const {
   signIn,
   signOut,
 } = NextAuth({
-  debug: true,
+  debug: process.env.NODE_ENV === "development",
+  // skipCSRFCheck: process.env.NODE_ENV === "development" ? skipCSRFCheck : undefined,
+  // cookies:{
+  // },
   pages: {
     signIn: "/auth/login",
     error: "/auth/error",
@@ -47,7 +50,7 @@ export const {
   callbacks: {
     async signIn({ user, account }) {
       // Allow OAuth sign-ins
-      if (account?.provider === "google") return true;
+      if (account?.provider !== "credentials") return true;
       try {
         console.log("getting user");
         const existingUser = await getUserByID(user.id!);

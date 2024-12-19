@@ -9,10 +9,10 @@ export default {
     Credentials({
       async authorize(credentials) {
         const validatedFields = LoginSchema.safeParse(credentials);
-        // console.log("Authorize function received credentials", credentials);
+        console.log("Authorize function received credentials", credentials);
 
         if (validatedFields.success) {
-          // console.log("Input fields are valid");
+          console.log("Input fields are valid");
           const { email, password } = validatedFields.data;
 
           const existingUser = await getUserByEmail(email);

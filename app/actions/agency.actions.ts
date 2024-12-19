@@ -123,9 +123,22 @@ export const getAllAgencyPrefix = async () => {
       },
     });
 
+    console.log(prefixes);
     const prefix = prefixes.map((r) => r.prefix);
 
     return prefix;
+  } catch (error) {
+    console.error("Error fetching prefixe", error);
+    throw new Error("Error fetching prefix");
+  }
+};
+export const getAllUsers = async () => {
+  try {
+    const users = await db.user.findMany();
+
+    console.log(users);
+
+    return users;
   } catch (error) {
     console.error("Error fetching prefixe", error);
     throw new Error("Error fetching prefix");
