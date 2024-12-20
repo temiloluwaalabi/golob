@@ -10,11 +10,15 @@ import {
 
 const { auth } = NextAuth(authConfig);
 
-export default auth((req) => {
+export default auth(async (req) => {
   const { nextUrl } = req;
-  const pathname = nextUrl.pathname;
 
-  const isLoggedIn = !!req.auth;
+  const pathname = nextUrl.pathname;
+  const isLoggedIn = !!req.auth?.user.email;
+
+  if (!req.auth?.user.id) {
+    console.log("No ID");
+  }
   console.log(isLoggedIn);
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isGuestRoutes = guestRoutes.includes(nextUrl.pathname);
@@ -41,6 +45,19 @@ export default auth((req) => {
       new URL(`/auth/login?callbackUrl=${encodedCallbackUrl}`, nextUrl)
     );
   }
+
+  // if (isLoggedIn) {
+  //   try {
+  //     const user = await getUserByEmail(req.auth?.user.email!);
+
+  //     if (!user || !user.emailVerified || user.userStatus !== "Activated") {
+  //       return Response.redirect(new URL("/auth/login", nextUrl));
+  //     }
+  //   } catch (error) {
+  //     console.error("Error in middleware user check:", error);
+  //     return Response.redirect(new URL("/auth/error", nextUrl));
+  //   }
+  // }
 
   if (isAuthRoute) {
     if (isLoggedIn) {

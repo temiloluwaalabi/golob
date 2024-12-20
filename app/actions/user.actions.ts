@@ -9,6 +9,7 @@ import { signIn, signOut } from "@/auth";
 import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
 import { AuthError } from "next-auth";
 import { revalidatePath } from "next/cache";
+import slugify from "slugify";
 export const CreateUser = async (values: z.infer<typeof RegisterSchema>) => {
   const validatedFields = RegisterSchema.safeParse(values);
   if (!validatedFields.success) {
@@ -28,6 +29,11 @@ export const CreateUser = async (values: z.infer<typeof RegisterSchema>) => {
       error: `User with this email (${email}) already exists!`,
     };
   }
+  const slugifiedUsername = slugify(firstName, {
+    lower: true,
+    strict: true,
+    trim: true,
+  });
 
   const user = await db.user.create({
     data: {
@@ -35,6 +41,7 @@ export const CreateUser = async (values: z.infer<typeof RegisterSchema>) => {
       firstName,
       lastName,
       email,
+      username: slugifiedUsername,
       hashedPassword,
       phoneNumber: number,
     },
@@ -206,6 +213,7 @@ export async function findOrCreateUser(googleUser: any) {
       email: googleUser.email,
       name: googleUser.name,
       image: googleUser.picture,
+      username: googleUser?.username,
     },
   });
 }

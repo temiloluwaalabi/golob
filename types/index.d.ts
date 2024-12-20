@@ -106,3 +106,18 @@ export enum AmericaSubregion {
   NorthAmerica = "North America",
   SouthAmerica = "South America",
 }
+
+export interface IAirport {
+  icao: string;
+  iata: string;
+  localCode: string;
+  name: string;
+  shortName: string;
+  municipalityName: string;
+  location: {
+    lat: number;
+    lon: number;
+  };
+  countryCode: string;
+  timeZone: string;
+}

@@ -365,15 +365,19 @@ model Layover {
 }
 
 model Airport {
-  id          String    @id @default(cuid()) @map("_id")
-  iataCode    String    @unique
-  name        String?
-  city        String?
-  countryCode String?
-  country     String?
-  Layover     Layover[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id               String    @id @default(cuid()) @map("_id")
+  icao             String
+  iata             String    @unique
+  name             String
+  shortName        String
+  municipalityName String
+  countryCode      String
+  latitude         Float
+  longitude        Float
+  timezone         String
+  Layover          Layover[]
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 }
 
 model Price {

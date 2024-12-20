@@ -30,6 +30,9 @@ import { Calendar } from "../ui/calendar";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { RegionCountry } from "@/types";
 import statesData from "@/constants/states.json"; // Import your states.json
+import { Airport } from "@prisma/client";
+import { api } from "@/lib/api";
+import { toast } from "sonner";
 const continents = [
   { name: "Africa", code: "AF", countries: ["NG", "GH", "KE", "ZA"] }, // Example popular countries (country codes)
   { name: "Asia", code: "AS", countries: ["CN", "IN", "JP", "KR"] },
@@ -45,13 +48,13 @@ export const FlightSearchForm = (props: Props) => {
   const [searchQuery, setSearchQuery] = React.useState<string>("");
 
   const [isPending, startTransition] = React.useTransition();
-  const [takeOff, setTakeOff] = useState("");
-  const [destination, setDestination] = useState("");
+
   const [tripWayType, setTripWayType] = useState("round-trip");
   const [flightClass, setFlightClass] = useState("");
   const [openLeavingFrom, setOpenLeavingFrom] = useState(false);
   const [openGoingTo, setOpenGoingTo] = useState(false);
   const [currentLocation, setCurrentLocation] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   const [openPassengers, setOpenPassengers] = useState(false);
   const [openDateCalendar, setOpenDateCalendar] = useState(false);
@@ -64,6 +67,8 @@ export const FlightSearchForm = (props: Props) => {
   const [teenagersCount, setTeenagersCount] = useState(0);
   const [infantsCount, setInfantsCount] = useState(0);
   const [agedCount, setAgedCount] = useState(0);
+
+  const [takeOffAirport, setTakeOffAirport] = useState<Partial<Airport[]>>();
 
   const [date, setDate] = useState<DateRange | undefined>({
     from: new Date(),
@@ -104,31 +109,43 @@ export const FlightSearchForm = (props: Props) => {
     const getCurrentLocation = () => {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
-          (position) => {
+          async (position) => {
             const { latitude, longitude } = position.coords;
 
             // Use a reverse geocoding API to get location details (city, country, etc.)
-            fetch(
-              `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`
-            )
-              .then((res) => res.json())
-              .then((data) => {
-                // Example: extract city/town or village name
-                const city =
-                  data.address?.city ||
-                  data.address?.town ||
-                  data.address?.village;
-                setCurrentLocation(city || "Unknown Location");
-              })
-              .catch((error) => {
-                console.error("Error getting location:", error);
-                setCurrentLocation("Unknown Location");
-              });
-          },
-          (error) => {
-            console.error("Error getting location:", error);
-            setCurrentLocation("Location access denied."); // Or handle the error as you see fit
+            try {
+              const response = await fetch(
+                `/api/reverse-geocode?lat=${latitude}&lon=${longitude}`
+              );
+              if (!response.ok) {
+                throw new Error("Failed to fetch city");
+              }
+              const data = await response.json();
+              console.log(data);
+              setCurrentLocation(data.data);
+              setError(null);
+            } catch (err) {
+              setError((err as Error).message);
+            }
+
+            // fetch(
+            //   `/api/reverse-geocode?lat=${latitude}&lon=${longitude}`
+            // )
+            //   .then((res) => res.json())
+            //   .then((data) => {
+            //     // Example: extract city/town or village name
+            //     const city = data.city
+            //     setCurrentLocation(city || "Unknown Location");
+            //   })
+            //   .catch((error) => {
+            //     console.error("Error getting location:", error);
+            //     setCurrentLocation("Unknown Location");
+            //   });
           }
+          // (error) => {
+          //   console.error("Error getting location:", error);
+          //   setCurrentLocation("Location access denied."); // Or handle the error as you see fit
+          // }
         );
       } else {
         setCurrentLocation("Geolocation not supported by browser.");
@@ -172,13 +189,40 @@ export const FlightSearchForm = (props: Props) => {
 
     return popularStates;
   };
+  const takeOff = form.watch("takeOff");
 
+  const fetchAiportsBySearchTerm = React.useCallback(async () => {
+    if (!takeOff || typeof takeOff !== "string" || takeOff.trim() === "") {
+      return;
+    }
+    const airports = await api.airports.getAll(takeOff);
+    console.log(airports);
+
+    if (airports.error) {
+      toast(airports.error.message);
+    }
+
+    if (airports.success && airports.data) {
+      console.log(airports.data);
+      setTakeOffAirport(airports.data);
+    }
+  }, [form.watch("takeOff")]);
+
+  console.log(takeOffAirport);
+  React.useEffect(() => {
+    fetchAiportsBySearchTerm();
+  }, [fetchAiportsBySearchTerm]);
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
         className="flex flex-col gap-4 lg:gap-8 items-end"
       >
+        <div>
+          {takeOffAirport?.map((airport) => (
+            <h2>{airport?.municipalityName}</h2>
+          ))}
+        </div>
         <div className="gap-4 grid grid-cols-12 w-full">
           <div className="flex flex-col md:flex-row gap-4 md:gap-3 relative  col-span-12 md:col-span-8 xxl:col-span-5">
             <FormField
@@ -266,11 +310,13 @@ export const FlightSearchForm = (props: Props) => {
                           ))
                         ) : (
                           <>
-                            {currentLocation ? (
-                              <p>Current Location: {currentLocation}</p>
-                            ) : (
-                              <p>Getting current location...</p>
-                            )}{" "}
+                            <div className="px-3 pb-2">
+                              {currentLocation ? (
+                                <p>Current Location: {currentLocation}</p>
+                              ) : (
+                                <p>Getting current location...</p>
+                              )}
+                            </div>
                             {/* Replace with actual current location */}
                             {continents.map((country, i) => (
                               <Card

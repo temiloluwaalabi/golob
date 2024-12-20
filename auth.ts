@@ -2,8 +2,9 @@ import NextAuth, { DefaultSession } from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { db } from "./lib/db";
 import authConfig from "./auth.config";
-import { getAccountByUserId, getUserByID } from "./data/user";
+import { getAccountByUserId, getUserByEmail, getUserByID } from "./data/user";
 import { UserRole } from "@prisma/client";
+import { api } from "./lib/api";
 
 declare module "next-auth" {
   interface Session {
@@ -26,9 +27,6 @@ export const {
   signOut,
 } = NextAuth({
   debug: process.env.NODE_ENV === "development",
-  // skipCSRFCheck: process.env.NODE_ENV === "development" ? skipCSRFCheck : undefined,
-  // cookies:{
-  // },
   pages: {
     signIn: "/auth/login",
     error: "/auth/error",
@@ -48,11 +46,44 @@ export const {
     },
   },
   callbacks: {
+    // async signIn({ user, account, profile }) {
+    //   console.log("OAuth started");
+    //   console.log("USER", user);
+    //   console.log("ACCOUNT", account);
+    //   console.log("PROFILE", profile);
+    //   // Allow OAuth sign-ins
+    //   if (account?.provider === "credentials") return true;
+    //   if (!account || !user) return false;
+    //   try {
+    //     const userInfo = {
+    //       name: user.name!,
+    //       email: user.email!,
+    //       image: user.image!,
+    //       username:
+    //         account.provider === "github"
+    //           ? (profile?.preferred_username as string)
+    //           : (user.name?.toLowerCase() as string),
+    //     };
+    //     console.log(userInfo);
+    //     const { success } = (await api.auth.oAuthSignIn({
+    //       user: userInfo,
+    //       provider: account.provider as "github" | "google",
+    //       providerAccountId: account.providerAccountId,
+    //     })) as ActionResponse;
+
+    //     if (!success) return false;
+
+    //     return true;
+    //   } catch (error) {
+    //     console.error("Error during sign-in callback:", error);
+    //     return false; // Deny sign-in on error
+    //   }
+    // },
     async signIn({ user, account }) {
-      // Allow OAuth sign-ins
-      if (account?.provider !== "credentials") return true;
       try {
-        console.log("getting user");
+        // Allow OAuth sign-ins
+        if (account?.provider !== "credentials") return true;
+
         const existingUser = await getUserByID(user.id!);
 
         // Add custom validation logic if needed, such as email verification
@@ -66,6 +97,7 @@ export const {
       }
     },
     async session({ session, token }) {
+      // console.log("SESSION", token);
       if (token.sub) {
         session.user = {
           ...session.user,
@@ -78,28 +110,14 @@ export const {
           image: token.picture!,
         };
       }
-      // if (token.sub && session.user) {
-      //   session.user.id = token.sub;
-      // }
-      // if (token.role && session.user) {
-      //   session.user.role = token.role as UserRole;
-      // }
-      // if (token.isTwoFactorEnabled && session.user) {
-      //   session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean;
-      // }
-
-      // if (session.user) {
-      //   session.user.name = token.name;
-      //   session.user.email = token.email as string;
-      //   session.user.isOAuth = token.isOAuth as boolean;
-      //   session.user.image = token.picture as string;
-      // }
-      // console.log(session);
-      // console.log(token);
       return session;
     },
-    async jwt({ token }) {
+    async jwt({ token, account }) {
+      // console.log("JWT", token);
       if (!token.sub) return token;
+      // if (account) {
+      //   // const {} = await
+      // }
       try {
         const user = await getUserByID(token.sub);
         if (user) {
@@ -118,28 +136,18 @@ export const {
         console.error("Error in jwt callback:", error);
         return token;
       }
-      // const existingUser = await getUserByID(token.sub);
-
-      // if (!existingUser) return token;
-
-      // const existingAccount = await getAccountByUserId(existingUser.id);
-
-      // // Check if existingAccount is not null or undefined
-      // if (existingAccount !== null && existingAccount !== undefined) {
-      //   token.isOAuth = true;
-      // } else {
-      //   token.isOAuth = false;
-      // }
-
-      // token.name = existingUser.name;
-      // token.email = existingUser.email;
-      // token.picture = existingUser.image;
-      // token.role = existingUser.role;
-      // token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled;
-      // return token;
     },
-    // authorized: () => {
-    //   return true;
+    // authorized: async ({ request, auth }) => {
+    //   try {
+    //     const id = auth?.user.id;
+    //     if (!id) {
+    //       console.log("no id");
+    //     }
+    //   } catch (error) {
+    //     console.error("Authorization check failed:", error);
+
+    //     return false;
+    //   }
     // },
     async redirect({ url, baseUrl }) {
       return url.startsWith(baseUrl) ? url : baseUrl;
