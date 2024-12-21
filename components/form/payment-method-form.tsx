@@ -1,8 +1,14 @@
 "use client";
-import { DebitCardSchema } from "@/lib/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Image from "next/image";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+
+import { DebitCardSchema } from "@/lib/validations";
+
+import { Button } from "../ui/button";
+import { Checkbox } from "../ui/checkbox";
 import {
   Form,
   FormControl,
@@ -11,11 +17,7 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
-import { useState } from "react";
 import { Input } from "../ui/input";
-import Image from "next/image";
-import { Checkbox } from "../ui/checkbox";
-import { Button } from "../ui/button";
 
 const acceptedCards = [
   { type: "American-Express", lengths: [15], prefixes: ["34", "37"] },
@@ -39,11 +41,11 @@ const CreditCardForm = ({ btnLabel }: CreditCardFormProps) => {
     resolver: zodResolver(DebitCardSchema),
   });
 
-  const cardNum = form.watch("cardNumber");
-  console.log(cardType);
+  // const cardNum = form.watch("cardNumber");
+  // console.log(cardType);
   const guessCardType = (cardNumber: string) => {
-    for (let card of acceptedCards) {
-      for (let prefix of card.prefixes) {
+    for (const card of acceptedCards) {
+      for (const prefix of card.prefixes) {
         if (cardNumber.startsWith(prefix)) {
           setMaxLength(Math.max(...card.lengths));
           return card.type;
@@ -161,17 +163,17 @@ const CreditCardForm = ({ btnLabel }: CreditCardFormProps) => {
             control={form.control}
             render={({ field }) => (
               <FormItem className="">
-                <div className="flex gap-1 items-center p-0 relative bg-white pr-[10px] h-[56px] border rounded-md ">
-                  <FormLabel className="absolute top-0 left-0 translate-x-3 mt-[-12px] bg-white px-2 py-1">
+                <div className="relative flex h-[56px] items-center gap-1 rounded-md border bg-white p-0 pr-[10px] ">
+                  <FormLabel className="absolute left-0 top-0 mt-[-12px] translate-x-3 bg-white px-2 py-1">
                     Card Number
                   </FormLabel>
                   <FormControl>
-                    <div className="flex items-center justify-between w-full">
+                    <div className="flex w-full items-center justify-between">
                       <Input
                         // disabled={isPending}
                         placeholder="Card Number"
                         type="email"
-                        className="!bg-transparent !border-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                        className="!border-none !bg-transparent focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
                         {...field}
                         onChange={(value) => {
                           handleCardNumberChange(value);
@@ -188,7 +190,7 @@ const CreditCardForm = ({ btnLabel }: CreditCardFormProps) => {
                             width={32}
                             height={32}
                             alt={cardType}
-                            className="absolute right-0 top-0 object-cover translate-y-[50%] -translate-x-3"
+                            className="absolute right-0 top-0 -translate-x-3 translate-y-1/2 object-cover"
                           />
                         </div>
                       )}
@@ -206,8 +208,8 @@ const CreditCardForm = ({ btnLabel }: CreditCardFormProps) => {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem className="">
-                    <div className="flex gap-1 items-center p-0 relative bg-white pr-[10px] h-[56px] border rounded-md ">
-                      <FormLabel className="absolute top-0 left-0 translate-x-3 mt-[-12px] bg-white px-2 py-1">
+                    <div className="relative flex h-[56px] items-center gap-1 rounded-md border bg-white p-0 pr-[10px] ">
+                      <FormLabel className="absolute left-0 top-0 mt-[-12px] translate-x-3 bg-white px-2 py-1">
                         Exp. Date
                       </FormLabel>
                       <FormControl>
@@ -215,7 +217,7 @@ const CreditCardForm = ({ btnLabel }: CreditCardFormProps) => {
                           // disabled={isPending}
                           placeholder="Expiry Date"
                           type="email"
-                          className="!bg-transparent !border-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                          className="!border-none !bg-transparent focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
                           {...field}
                           onChange={handleExpiryDateChange}
                           onKeyDown={handleExpiryDateClear}
@@ -233,8 +235,8 @@ const CreditCardForm = ({ btnLabel }: CreditCardFormProps) => {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem className="">
-                    <div className="flex gap-1 items-center p-0 relative bg-white pr-[10px] h-[56px] border rounded-md ">
-                      <FormLabel className="absolute top-0 left-0 translate-x-3 mt-[-12px] bg-white px-2 py-1">
+                    <div className="relative flex h-[56px] items-center gap-1 rounded-md border bg-white p-0 pr-[10px] ">
+                      <FormLabel className="absolute left-0 top-0 mt-[-12px] translate-x-3 bg-white px-2 py-1">
                         CVC
                       </FormLabel>
                       <FormControl>
@@ -242,7 +244,7 @@ const CreditCardForm = ({ btnLabel }: CreditCardFormProps) => {
                           // disabled={isPending}
                           placeholder="123"
                           type="email"
-                          className="!bg-transparent !border-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                          className="!border-none !bg-transparent focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
                           {...field}
                         />
                       </FormControl>
@@ -258,8 +260,8 @@ const CreditCardForm = ({ btnLabel }: CreditCardFormProps) => {
             control={form.control}
             render={({ field }) => (
               <FormItem className="">
-                <div className="flex gap-1 items-center p-0 relative bg-white pr-[10px] h-[56px] border rounded-md ">
-                  <FormLabel className="absolute top-0 left-0 translate-x-3 mt-[-12px] bg-white px-2 py-1">
+                <div className="relative flex h-[56px] items-center gap-1 rounded-md border bg-white p-0 pr-[10px] ">
+                  <FormLabel className="absolute left-0 top-0 mt-[-12px] translate-x-3 bg-white px-2 py-1">
                     Name
                   </FormLabel>
                   <FormControl>
@@ -267,7 +269,7 @@ const CreditCardForm = ({ btnLabel }: CreditCardFormProps) => {
                       // disabled={isPending}
                       placeholder="Enter your name"
                       type="text"
-                      className="!bg-transparent !border-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                      className="!border-none !bg-transparent focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
                       {...field}
                     />
                   </FormControl>
@@ -280,8 +282,8 @@ const CreditCardForm = ({ btnLabel }: CreditCardFormProps) => {
             control={form.control}
             render={({ field }) => (
               <FormItem className="">
-                <div className="flex gap-1 items-center p-0 relative bg-white pr-[10px] h-[56px] border rounded-md ">
-                  <FormLabel className="absolute top-0 left-0 translate-x-3 mt-[-12px] bg-white px-2 py-1">
+                <div className="relative flex h-[56px] items-center gap-1 rounded-md border bg-white p-0 pr-[10px] ">
+                  <FormLabel className="absolute left-0 top-0 mt-[-12px] translate-x-3 bg-white px-2 py-1">
                     Country or Region
                   </FormLabel>
                   <FormControl>
@@ -289,7 +291,7 @@ const CreditCardForm = ({ btnLabel }: CreditCardFormProps) => {
                       // disabled={isPending}
                       placeholder="Select your country"
                       type="text"
-                      className="!bg-transparent !border-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                      className="!border-none !bg-transparent focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
                       {...field}
                     />
                   </FormControl>
@@ -297,7 +299,7 @@ const CreditCardForm = ({ btnLabel }: CreditCardFormProps) => {
               </FormItem>
             )}
           />
-          <div className="flex justify-between items-center">
+          <div className="flex items-center justify-between">
             <FormField
               name="saveInfo"
               control={form.control}
@@ -321,11 +323,11 @@ const CreditCardForm = ({ btnLabel }: CreditCardFormProps) => {
             />
           </div>
         </div>
-        <div className="space-y-6 my-[14px] mt-[30px] flex flex-col items-center">
-          <Button className="w-full h-[48px] rounded-md text-sm hover:bg-primary-blackishGreen hover:text-white font-semibold text-primary-blackishGreen">
+        <div className="my-[14px] mt-[30px] flex flex-col items-center space-y-6">
+          <Button className="h-[48px] w-full rounded-md text-sm font-semibold text-primary-blackishGreen hover:bg-primary-blackishGreen hover:text-white">
             {btnLabel}
           </Button>
-          <p className="flex gap-1 text-center items-center text-xs font-normal opacity-75 text-primary-blackishGreen">
+          <p className="flex items-center gap-1 text-center text-xs font-normal text-primary-blackishGreen opacity-75">
             <span>
               By confirming your subscription, you allow The Outdoor Inn Crowd
               Limited to charge your card for this payment and future payments

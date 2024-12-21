@@ -1,6 +1,8 @@
 "use client";
 
 import React from "react";
+
+import { TimelineElement } from "@/data/data";
 import {
   Timeline,
   TimelineItem,
@@ -12,7 +14,6 @@ import {
   TimelineContent,
   TimelineTime,
 } from "@/widgets/timeline";
-import { TimelineElement } from "@/data/data";
 
 interface TimelineLayoutProps {
   items: TimelineElement[]; // Replace any[] with the actual type of items.

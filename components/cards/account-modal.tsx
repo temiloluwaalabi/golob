@@ -1,8 +1,10 @@
 "use client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useEffect, useState } from "react";
 import { Account, User } from "@prisma/client";
+import { useEffect, useState } from "react";
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAccountByUserId, getUserByEmail } from "@/data/user";
+
 import { AccountModalForm } from "../form/account-modal-form";
 
 interface AccountModalProps {
@@ -35,12 +37,12 @@ const AccountModal = ({ userId, email }: AccountModalProps) => {
   return (
     <>
       <Card className="">
-        <CardHeader className="shadow-none border-b border-b-borderB p-0 py-3">
-          <CardTitle className="text-base text-ellipsis font-bold text-center">
+        <CardHeader className="border-b-borderB border-b p-0 py-3 shadow-none">
+          <CardTitle className="text-ellipsis text-center text-base font-bold">
             Welcome Back, {user ? user.name : ""}
           </CardTitle>
         </CardHeader>
-        <CardContent className="relative overflow-y-auto custom-scrollbar px-4 pt-6 pb-3">
+        <CardContent className="custom-scrollbar relative overflow-y-auto px-4 pb-3 pt-6">
           <AccountModalForm user={user} account={account} />
         </CardContent>
       </Card>

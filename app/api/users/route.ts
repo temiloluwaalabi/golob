@@ -9,7 +9,7 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const users = await db.user.findMany();
+    const users = await db.airport.findMany();
 
     return NextResponse.json({ success: true, data: users }, { status: 200 });
   } catch (error) {

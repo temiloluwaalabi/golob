@@ -1,8 +1,12 @@
+import { api } from "@/lib/api";
 import { db } from "@/lib/db";
 import handleError from "@/lib/handlers/error";
 import { ForbiddenError, NotFoundError } from "@/lib/http-errors";
 import { IAirport } from "@/types";
+import { Location } from "@prisma/client";
+
 import { NextRequest, NextResponse } from "next/server";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API || "http://localhost:3001/api";
 
 const API_URL =
   "https://api.magicapi.dev/api/v1/aedbx/aerodatabox/airports/search/term";
@@ -10,7 +14,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const search = searchParams.get("search");
 
-  const limit: number = 20;
+  const limit: number = 50;
   const withFlightInfoOnly: boolean = false;
   const withSearchByCode: boolean = false;
 
@@ -31,7 +35,6 @@ export async function GET(request: NextRequest) {
 
     if (existingAirports.length > 0) {
       console.log("EXISTING_AIRPORT", existingAirports);
-
       return NextResponse.json(
         { success: true, data: existingAirports },
         { status: 200 }
@@ -46,9 +49,6 @@ export async function GET(request: NextRequest) {
       withFlightInfoOnly.toString()
     );
     url.searchParams.append("withSearchByCode", withSearchByCode.toString());
-
-    console.log(url);
-
     const options = {
       method: "GET",
       headers: {
@@ -56,18 +56,31 @@ export async function GET(request: NextRequest) {
       },
     };
 
+    console.log(url);
     const response = await fetch(url.toString(), options);
-
     if (!response.ok) {
       throw new NotFoundError("Airports");
     }
     const data = await response.json();
-
+    console.log("DATA_COUNT", data.count);
     const airports: IAirport[] = data.items;
 
+    console.log("DATA_AIRPORT", airports);
+
     const savedAirports = await Promise.all(
-      airports.map((airport: IAirport) =>
-        db.airport.upsert({
+      airports.map(async (airport: IAirport) => {
+        const hUrl = new URL(`${API_BASE_URL}/reverse-geocode`);
+        hUrl.searchParams.append("lat", airport.location.lat.toString());
+        hUrl.searchParams.append("lon", airport.location.lon.toString());
+        const response = await fetch(hUrl, {
+          method: "GET",
+        });
+        if (!response.ok) {
+          throw new NotFoundError("Location");
+        }
+        const location = await response.json();
+
+        const saved = await db.airport.upsert({
           where: {
             iata: airport.iata,
           },
@@ -81,6 +94,9 @@ export async function GET(request: NextRequest) {
             latitude: airport.location.lat,
             longitude: airport.location.lon,
             timezone: airport.timeZone,
+            country: location.data?.country || "",
+            state: location.data?.state,
+            continent: location.data?.continent,
           },
           create: {
             icao: airport.icao,
@@ -92,9 +108,14 @@ export async function GET(request: NextRequest) {
             latitude: airport.location.lat,
             longitude: airport.location.lon,
             timezone: airport.timeZone,
+            country: location.data?.country || "",
+            state: location.data?.state,
+            continent: location.data?.continent,
           },
-        })
-      )
+        });
+
+        return saved;
+      })
     );
 
     console.log("SAVED_AIRPORT", savedAirports);

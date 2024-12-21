@@ -1,14 +1,13 @@
 "use client";
-import * as z from "zod";
-import { useForm } from "react-hook-form";
-import { EmailSchema, LoginSchema } from "@/lib/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+
+import { EmailSchema } from "@/lib/validations";
+
+import { Button } from "../ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "../ui/form";
 import { Input } from "../ui/input";
-import { Checkbox } from "../ui/checkbox";
-import Link from "next/link";
-import { Button } from "../ui/button";
-import CustomPasswordInput from "@/widgets/password-widget";
 
 const ForgotPassword = () => {
   const form = useForm<z.infer<typeof EmailSchema>>({
@@ -27,8 +26,8 @@ const ForgotPassword = () => {
             control={form.control}
             render={({ field }) => (
               <FormItem className="">
-                <div className="flex gap-1 items-center p-0 relative bg-white pr-[10px] h-[56px] border rounded-md ">
-                  <FormLabel className="absolute top-0 left-0 translate-x-3 mt-[-12px] bg-white px-2 py-1">
+                <div className="relative flex h-[56px] items-center gap-1 rounded-md border bg-white p-0 pr-[10px] ">
+                  <FormLabel className="absolute left-0 top-0 mt-[-12px] translate-x-3 bg-white px-2 py-1">
                     Email
                   </FormLabel>
                   <FormControl>
@@ -36,7 +35,7 @@ const ForgotPassword = () => {
                       // disabled={isPending}
                       placeholder="Enter your email"
                       type="email"
-                      className="!bg-transparent !border-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                      className="!border-none !bg-transparent focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
                       {...field}
                     />
                   </FormControl>
@@ -45,8 +44,8 @@ const ForgotPassword = () => {
             )}
           />
 
-          <div className="space-y-6 my-[14px] flex flex-col items-center">
-            <Button className="w-full h-[48px] rounded-md text-sm hover:bg-primary-blackishGreen hover:text-white font-semibold text-primary-blackishGreen">
+          <div className="my-[14px] flex flex-col items-center space-y-6">
+            <Button className="h-[48px] w-full rounded-md text-sm font-semibold text-primary-blackishGreen hover:bg-primary-blackishGreen hover:text-white">
               Submit
             </Button>
           </div>

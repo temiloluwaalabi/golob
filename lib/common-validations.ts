@@ -1,5 +1,6 @@
-import { messages } from "@/config/messages";
 import * as z from "zod";
+
+import { messages } from "@/config/messages";
 export const FileSchema = z.object({
   name: z.string(),
   url: z.string(),
@@ -42,13 +43,13 @@ export const validateConfirmPassword = z
   .string()
   .min(1, { message: messages.confirmPasswordRequired })
   .min(6, { message: messages.passwordLengthMin })
-  .regex(new RegExp(".*[A-Z].*"), {
+  .regex(/.*[A-Z].*/, {
     message: messages.passwordOneUppercase,
   })
-  .regex(new RegExp(".*[a-z].*"), {
+  .regex(/.*[a-z].*/, {
     message: messages.passwordOneLowercase,
   })
-  .regex(new RegExp(".*\\d.*"), {
+  .regex(/.*\d.*/, {
     message: messages.passwordOneNumeric,
   });
 export const SetupPasswordCSchema = z

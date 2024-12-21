@@ -1,28 +1,30 @@
 "use client";
-import { cn } from "@/lib/utils";
-import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
-import { Button } from "../ui/button";
-import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
+import Link from "next/link";
+
+import { cn } from "@/lib/utils";
+
+import { Button } from "../ui/button";
+import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
 
 const ErrorCard = () => {
   return (
     <Card className="w-[400px] shadow-md">
       <CardHeader>
-        <div className="w-full flex flex-col gap-y-4 items-center justify-center">
+        <div className="flex w-full flex-col items-center justify-center gap-y-4">
           <h1 className={cn("text-3xl font-semibold")}>🔐Auth</h1>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             Oops! Something went wrong
           </p>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="w-full flex justify-center items-center">
+        <div className="flex w-full items-center justify-center">
           <AlertTriangle className="text-destructive" />
         </div>
       </CardContent>
       <CardFooter>
-        <Button variant="link" className="font-normal w-full" size="sm" asChild>
+        <Button variant="link" className="w-full font-normal" size="sm" asChild>
           <Link href="/auth/login">Back to Login</Link>
         </Button>
       </CardFooter>

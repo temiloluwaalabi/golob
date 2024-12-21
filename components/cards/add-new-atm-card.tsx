@@ -1,9 +1,9 @@
 // @flow
 import * as React from "react";
+
 import { Card } from "../ui/card";
-type Props = {};
-export const AddNewAtmCard = (props: Props) => {
+export const AddNewAtmCard = () => {
   return (
-    <Card className="bg-primary border-none shadow-none outline-none rounded-[16px] p-4 h-[212px] flex flex-col justify-between items-start w-full"></Card>
+    <Card className="flex h-[212px] w-full flex-col items-start justify-between rounded-[16px] border-none bg-primary p-4 shadow-none outline-none"></Card>
   );
 };

@@ -1,13 +1,14 @@
 "use client";
-import * as z from "zod";
-import { useForm } from "react-hook-form";
-import { VerifyCodeSchema } from "@/lib/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "../ui/form";
-import { Input } from "../ui/input";
 import Link from "next/link";
-import { Button } from "../ui/button";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+
+import { VerifyCodeSchema } from "@/lib/validations";
 import CustomPasswordInput from "@/widgets/password-widget";
+
+import { Button } from "../ui/button";
+import { Form, FormControl, FormField, FormItem } from "../ui/form";
 
 const VerfiyCode = () => {
   const form = useForm<z.infer<typeof VerifyCodeSchema>>({
@@ -40,14 +41,14 @@ const VerfiyCode = () => {
           <p>
             <span>Didn&apos;t recieve a code?</span>{" "}
             <Link
-              className="text-primary-salmon text-14_medium"
+              className="text-14_medium text-primary-salmon"
               href="/auth/forgot-password"
             >
               Resend
             </Link>
           </p>
-          <div className="space-y-6 my-[14px] flex flex-col items-center">
-            <Button className="w-full h-[48px] rounded-md text-sm hover:bg-primary-blackishGreen hover:text-white font-semibold text-primary-blackishGreen">
+          <div className="my-[14px] flex flex-col items-center space-y-6">
+            <Button className="h-[48px] w-full rounded-md text-sm font-semibold text-primary-blackishGreen hover:bg-primary-blackishGreen hover:text-white">
               Verify
             </Button>
           </div>

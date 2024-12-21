@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+
 import { db } from "./db";
 
 export const currentUser = async () => {
@@ -21,7 +22,8 @@ export const currentUser = async () => {
       updatedAt: currentUser.createdAt.toISOString(),
       emailVerified: currentUser.emailVerified?.toISOString() || null,
     };
-  } catch (error: any) {
+  } catch (error) {
+    console.error(error);
     return null;
   }
 };

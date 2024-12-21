@@ -1,7 +1,8 @@
 "use client";
+import Link from "next/link";
 import React from "react";
 
-import { usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -9,19 +10,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { PreOnboardingData } from "@/store/agency-pre-onboarding";
-import { useAtom } from "jotai";
 
 // @flow
-type Props = {};
-export const AgencyPreOnboardingFinal = (props: Props) => {
-  const pathname = usePathname();
-  const [generalData, setGeneralData] = useAtom(PreOnboardingData);
-
+export const AgencyPreOnboardingFinal = () => {
   return (
-    <Card className="border-none bg-transparent outline-none focus-visible:ring-0 focus-visible:!ring-offset-0 shadow-none p-0 flex flex-col h-full   gap-8">
+    <Card className="flex h-full flex-col gap-8 border-none bg-transparent p-0 shadow-none outline-none focus-visible:ring-0   focus-visible:!ring-offset-0">
       <CardHeader className="p-0">
         <CardTitle>
           <h3 className="text-xl font-bold">Reviewing Your Agency Details</h3>
@@ -32,18 +25,18 @@ export const AgencyPreOnboardingFinal = (props: Props) => {
           </p>
         </CardDescription>
       </CardHeader>
-      <CardContent className="p-0 space-y-6">
-        <div className="border p-4 rounded-[10px] space-y-2">
+      <CardContent className="space-y-6 p-0">
+        <div className="space-y-2 rounded-[10px] border p-4">
           <h2 className="text-base font-semibold">Verify Agency Email</h2>
           <p className="text-sm">
             A verification link has been sent to your mail for you to verify
             your agency email. Please verify the email.
           </p>
         </div>
-        <div className="border p-4 rounded-[10px] space-y-2">
-          <div className="flex justify-between items-center">
+        <div className="space-y-2 rounded-[10px] border p-4">
+          <div className="flex items-center justify-between">
             <h2 className="text-base font-semibold">Reviewing Account</h2>
-            <p className="p-2 bg-green-100 rounded-md font-semibold text-green-600">
+            <p className="rounded-md bg-green-100 p-2 font-semibold text-green-600">
               Pending
             </p>
           </div>
@@ -56,7 +49,7 @@ export const AgencyPreOnboardingFinal = (props: Props) => {
             tour of our dashboard.
           </p>
           <Button
-            className="bg-primary-blackishGreen hover:bg-primary mt-4"
+            className="mt-4 bg-primary-blackishGreen hover:bg-primary"
             asChild
           >
             <Link href="/auth/login">Sign In</Link>

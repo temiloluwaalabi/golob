@@ -1,4 +1,7 @@
 import * as z from "zod";
+
+import { messages } from "@/config/messages";
+
 import {
   addressSchema,
   FileSchema,
@@ -6,7 +9,6 @@ import {
   ValidateEmail,
   validatePassword,
 } from "./common-validations";
-import { messages } from "@/config/messages";
 
 export const LoginSchema = z.object({
   email: ValidateEmail,

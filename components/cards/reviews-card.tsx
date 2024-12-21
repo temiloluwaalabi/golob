@@ -1,6 +1,11 @@
 "use client";
 // @flow
+import { ChevronDown, ChevronUp, Star, StarHalf } from "lucide-react";
+import Image from "next/image";
 import * as React from "react";
+
+import GoogleIcon from "../icons/google";
+import { Button } from "../ui/button";
 import {
   Card,
   CardContent,
@@ -9,10 +14,6 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import { ChevronDown, ChevronUp, Star, StarHalf } from "lucide-react";
-import GoogleIcon from "../icons/google";
-import Image from "next/image";
-import { Button } from "../ui/button";
 type Props = {
   title: string;
   description: string;
@@ -33,14 +34,14 @@ export const ReviewsCard = (props: Props) => {
     const stars = [];
     for (let i = 0; i < fullStars; i++) {
       stars.push(
-        <Star key={i} className="size-6 text-orange-300 mr-2" fill="#fdba74" />
+        <Star key={i} className="mr-2 size-6 text-orange-300" fill="#fdba74" />
       );
     }
     if (hasHalfStar) {
       stars.push(
         <StarHalf
           key={fullStars}
-          className="size-6 text-orange-300 mr-2"
+          className="mr-2 size-6 text-orange-300"
           fill="#fdba74"
         />
       );
@@ -58,7 +59,7 @@ export const ReviewsCard = (props: Props) => {
     : props.description;
   return (
     <div>
-      <Card className="p-6 flex flex-col justify-center relative  shadow-lg rounded-[20px] bg-white gap-5">
+      <Card className="relative flex flex-col justify-center gap-5  rounded-[20px] bg-white p-6 shadow-lg">
         <CardHeader className="flex flex-col gap-2 p-0">
           <CardTitle className="font-gothic text-2xl font-bold text-primary-blackishGreen">
             {props.title}
@@ -70,20 +71,20 @@ export const ReviewsCard = (props: Props) => {
           </CardDescription>
           {words.length > 15 && (
             <Button
-              className="w-auto ml-auto p-0"
+              className="ml-auto w-auto p-0"
               variant={"link"}
               onClick={() => setShowFullDescription((prev) => !prev)}
             >
               {showFullDescription ? (
                 <>
                   <span className="flex items-center">
-                    Hide <ChevronUp className="size-4 ms-2" />
+                    Hide <ChevronUp className="ms-2 size-4" />
                   </span>
                 </>
               ) : (
                 <>
                   <span className="flex items-center">
-                    View More <ChevronDown className="size-4 ms-2" />
+                    View More <ChevronDown className="ms-2 size-4" />
                   </span>
                 </>
               )}
@@ -105,7 +106,7 @@ export const ReviewsCard = (props: Props) => {
             </div>
             <div className="flex items-center gap-2">
               <GoogleIcon />
-              <span className="text-xs font-bold font-gothic opacity-50">
+              <span className="font-gothic text-xs font-bold opacity-50">
                 Google
               </span>
             </div>
@@ -117,10 +118,10 @@ export const ReviewsCard = (props: Props) => {
             alt={`${props.name} review`}
             width={377}
             height={200}
-            className="rounded-[8px] object-cover w-full h-[200px]"
+            className="h-[200px] w-full rounded-[8px] object-cover"
           />
         </CardFooter>
-        <div className="absolute size-full bg-[#CDEAE1] left-[15px] lg:left-[25px] top-[22px] rounded-[20px] -z-10" />
+        <div className="absolute left-[15px] top-[22px] -z-10 size-full rounded-[20px] bg-[#CDEAE1] lg:left-[25px]" />
       </Card>
     </div>
   );

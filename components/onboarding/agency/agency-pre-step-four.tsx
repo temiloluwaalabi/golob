@@ -1,14 +1,19 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-unused-vars */
 "use client";
-import React, { useState, useEffect, useTransition } from "react";
-import { AgencyIdentityAddressProof } from "@/lib/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useAtom } from "jotai";
+import { Loader } from "lucide-react";
+import { usePathname } from "next/navigation";
+import React, { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
-import { useRouter } from "next/navigation";
-import CustomFormField from "@/widgets/custom-form-field";
-import { CreateUser } from "@/app/actions/user.actions";
-import { usePathname } from "next/navigation";
+import { FormFieldTypes } from "@/components/form/login-form";
+import { ENDPOINTS } from "@/components/shared/upload-zone";
+import UploadZone from "@/components/shared/upzone";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -17,36 +22,26 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-import { Loader } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
-import { FormFieldTypes } from "@/components/form/login-form";
-import { useAtom } from "jotai";
+import { SelectItem } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import { AgencyIdentityAddressProof } from "@/lib/validations";
 import {
-  agencyDetailsAtom,
-  persoanlDetailsAtom,
   PreOnboardingData,
   useAgencyPeOnboardingAtom,
   verifyPersonalAddressAtom,
 } from "@/store/agency-pre-onboarding";
-import UploadZone from "@/components/shared/upzone";
-import { ENDPOINTS } from "@/components/shared/upload-zone";
-import { SelectItem } from "@/components/ui/select";
+import CustomFormField from "@/widgets/custom-form-field";
 // @flow
 type Props = {
   isLoading?: boolean;
 };
 export const AgencyPreOnboardingStepFour = (props: Props) => {
-  const pathname = usePathname();
   const [data, setData] = useAtom(verifyPersonalAddressAtom);
   const [generalData, setGeneralData] = useAtom(PreOnboardingData);
 
   const [isPending, startTransition] = useTransition();
-  const { goToNextStep, goToPreviousStep, setStep, step } =
-    useAgencyPeOnboardingAtom();
+  const { goToNextStep, goToPreviousStep } = useAgencyPeOnboardingAtom();
 
   const form = useForm<z.infer<typeof AgencyIdentityAddressProof>>({
     resolver: zodResolver(AgencyIdentityAddressProof),
@@ -120,7 +115,7 @@ export const AgencyPreOnboardingStepFour = (props: Props) => {
     // });
   };
   return (
-    <Card className="border-none bg-transparent outline-none focus-visible:ring-0 focus-visible:!ring-offset-0 shadow-none p-0 flex flex-col h-full   gap-8">
+    <Card className="flex h-full flex-col gap-8 border-none bg-transparent p-0 shadow-none outline-none focus-visible:ring-0   focus-visible:!ring-offset-0">
       <CardHeader className="p-0">
         <CardTitle>
           <h3 className="text-xl font-bold">Personal Address Verification</h3>
@@ -133,7 +128,7 @@ export const AgencyPreOnboardingStepFour = (props: Props) => {
       </CardHeader>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6 ">
-          <CardContent className="p-0 space-y-6">
+          <CardContent className="space-y-6 p-0">
             <div className="grid grid-cols-12 gap-4">
               <div className="col-span-12">
                 <CustomFormField
@@ -238,11 +233,11 @@ export const AgencyPreOnboardingStepFour = (props: Props) => {
               </div>
             </div>
           </CardContent>
-          <CardFooter className="p-0  gap-4 mt-auto">
+          <CardFooter className="mt-auto  gap-4 p-0">
             <Button
               type="button"
               disabled={isPending}
-              className="w-full h-[48px] bg-transparent border-2 border-primary rounded-md text-sm hover:bg-primary hover:text-white font-semibold text-primary-blackishGreen"
+              className="h-[48px] w-full rounded-md border-2 border-primary bg-transparent text-sm font-semibold text-primary-blackishGreen hover:bg-primary hover:text-white"
               onClick={goToPreviousStep}
             >
               {/* <Loader
@@ -257,7 +252,7 @@ export const AgencyPreOnboardingStepFour = (props: Props) => {
             <Button
               type="submit"
               disabled={isPending}
-              className=" w-full h-[48px] rounded-md text-sm hover:bg-primary-blackishGreen hover:text-white font-semibold text-primary-blackishGreen"
+              className=" h-[48px] w-full rounded-md text-sm font-semibold text-primary-blackishGreen hover:bg-primary-blackishGreen hover:text-white"
             >
               <Loader
                 className={cn(

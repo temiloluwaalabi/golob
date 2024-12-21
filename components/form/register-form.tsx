@@ -1,20 +1,22 @@
 "use client";
-import * as z from "zod";
-import { useForm } from "react-hook-form";
-import { RegisterSchema } from "@/lib/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useTransition } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+
+import { CreateUser } from "@/app/actions/user.actions";
+import { cn } from "@/lib/utils";
+import { RegisterSchema } from "@/lib/validations";
+import CustomPasswordInput from "@/widgets/password-widget";
+
+import { Button } from "../ui/button";
+import { Checkbox } from "../ui/checkbox";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "../ui/form";
 import { Input } from "../ui/input";
-import { Checkbox } from "../ui/checkbox";
-import Link from "next/link";
-import { Button } from "../ui/button";
-import CustomPasswordInput from "@/widgets/password-widget";
 import { useToast } from "../ui/use-toast";
-import { useTransition } from "react";
-import { CreateUser } from "@/app/actions/user.actions";
-import { useRouter } from "next/navigation";
-import { Loader } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 const RegisterForm = () => {
   // const [showPassword, setShowPassword] = useState(false);
@@ -59,8 +61,8 @@ const RegisterForm = () => {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem className="">
-                    <div className="flex gap-1 items-center p-0 relative bg-white pr-[10px] h-[56px] border rounded-md ">
-                      <FormLabel className="absolute top-0 left-0 translate-x-3 mt-[-12px] bg-white px-2 py-1">
+                    <div className="relative flex h-[56px] items-center gap-1 rounded-md border bg-white p-0 pr-[10px] ">
+                      <FormLabel className="absolute left-0 top-0 mt-[-12px] translate-x-3 bg-white px-2 py-1">
                         First Name
                       </FormLabel>
                       <FormControl>
@@ -68,7 +70,7 @@ const RegisterForm = () => {
                           disabled={isPending}
                           placeholder="Enter your firstname"
                           type="text"
-                          className="!bg-transparent !border-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                          className="!border-none !bg-transparent focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
                           {...field}
                         />
                       </FormControl>
@@ -83,8 +85,8 @@ const RegisterForm = () => {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem className="">
-                    <div className="flex gap-1 items-center p-0 relative bg-white pr-[10px] h-[56px] border rounded-md ">
-                      <FormLabel className="absolute top-0 left-0 translate-x-3 mt-[-12px] bg-white px-2 py-1">
+                    <div className="relative flex h-[56px] items-center gap-1 rounded-md border bg-white p-0 pr-[10px] ">
+                      <FormLabel className="absolute left-0 top-0 mt-[-12px] translate-x-3 bg-white px-2 py-1">
                         Last Name
                       </FormLabel>
                       <FormControl>
@@ -92,7 +94,7 @@ const RegisterForm = () => {
                           disabled={isPending}
                           placeholder="Enter your lastname"
                           type="text"
-                          className="!bg-transparent !border-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                          className="!border-none !bg-transparent focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
                           {...field}
                         />
                       </FormControl>
@@ -109,8 +111,8 @@ const RegisterForm = () => {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem className="">
-                    <div className="flex gap-1 items-center p-0 relative bg-white pr-[10px] h-[56px] border rounded-md ">
-                      <FormLabel className="absolute top-0 left-0 translate-x-3 mt-[-12px] bg-white px-2 py-1">
+                    <div className="relative flex h-[56px] items-center gap-1 rounded-md border bg-white p-0 pr-[10px] ">
+                      <FormLabel className="absolute left-0 top-0 mt-[-12px] translate-x-3 bg-white px-2 py-1">
                         Email
                       </FormLabel>
                       <FormControl>
@@ -118,7 +120,7 @@ const RegisterForm = () => {
                           disabled={isPending}
                           placeholder="Enter your email"
                           type="text"
-                          className="!bg-transparent !border-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                          className="!border-none !bg-transparent focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
                           {...field}
                         />
                       </FormControl>
@@ -133,8 +135,8 @@ const RegisterForm = () => {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem className="">
-                    <div className="flex gap-1 items-center p-0 relative bg-white pr-[10px] h-[56px] border rounded-md ">
-                      <FormLabel className="absolute top-0 left-0 translate-x-3 mt-[-12px] bg-white px-2 py-1">
+                    <div className="relative flex h-[56px] items-center gap-1 rounded-md border bg-white p-0 pr-[10px] ">
+                      <FormLabel className="absolute left-0 top-0 mt-[-12px] translate-x-3 bg-white px-2 py-1">
                         Phone Number
                       </FormLabel>
                       <FormControl>
@@ -142,7 +144,7 @@ const RegisterForm = () => {
                           disabled={isPending}
                           placeholder="Enter your phonenumber"
                           type="text"
-                          className="!bg-transparent !border-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                          className="!border-none !bg-transparent focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
                           {...field}
                         />
                       </FormControl>
@@ -189,7 +191,7 @@ const RegisterForm = () => {
             </div>
           </div>
 
-          <div className="flex justify-between items-center">
+          <div className="flex items-center justify-between">
             <FormField
               name="terms"
               control={form.control}
@@ -232,10 +234,10 @@ const RegisterForm = () => {
               Forgot Password
             </Link> */}
           </div>
-          <div className="space-y-6 my-[14px] flex flex-col items-center">
+          <div className="my-[14px] flex flex-col items-center space-y-6">
             <Button
               disabled={isPending}
-              className="w-full h-[48px] rounded-md text-sm hover:bg-primary-blackishGreen hover:text-white font-semibold text-primary-blackishGreen"
+              className="h-[48px] w-full rounded-md text-sm font-semibold text-primary-blackishGreen hover:bg-primary-blackishGreen hover:text-white"
             >
               <Loader
                 className={cn(
@@ -245,7 +247,7 @@ const RegisterForm = () => {
               />
               {isPending ? "Creating Account..." : "Create Account"}
             </Button>
-            <p className="flex gap-1 text-center items-center text-14_medium text-primary-blackishGreen">
+            <p className="text-14_medium flex items-center gap-1 text-center text-primary-blackishGreen">
               <span>Already have an account</span>{" "}
               <Link href="/auth/login" className="text-primary-salmon">
                 Login

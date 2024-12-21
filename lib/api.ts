@@ -1,6 +1,8 @@
+import { Account, Airport, Location } from "@prisma/client";
+
 import { User } from "@/types";
+
 import { fetchHandler } from "./handlers/fetch";
-import { Account, Airport } from "@prisma/client";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API || "http://localhost:3001/api";
 
 export const api = {
@@ -76,5 +78,11 @@ export const api = {
   airports: {
     getAll: (searchTerm: string) =>
       fetchHandler<Airport[]>(`${API_BASE_URL}/airports?search=${searchTerm}`),
+  },
+  geoCoding: {
+    getLocation: (lat: string, lon: string) =>
+      fetchHandler<Location>(
+        `${API_BASE_URL}/reverse-geocode?lat=${lat}&lon=${lon}`
+      ),
   },
 };

@@ -1,6 +1,18 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useAtom } from "jotai";
+import { Loader } from "lucide-react";
 import React, { useState, useTransition } from "react";
-import { usePathname } from "next/navigation";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+
+import { FormFieldTypes } from "@/components/form/login-form";
+import { ENDPOINTS } from "@/components/shared/upload-zone";
+import UploadZone from "@/components/shared/upzone";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -9,41 +21,28 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-import { Loader } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
-import { useToast } from "@/components/ui/use-toast";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { AgencyIdentityKYCSchema } from "@/lib/validations";
+import { SelectItem } from "@/components/ui/select";
 import {
   allowedCountries,
   identificationDocuments,
   kycDocs,
 } from "@/constants";
-import CustomFormField from "@/widgets/custom-form-field";
-import { FormFieldTypes } from "@/components/form/login-form";
-import { SelectItem } from "@/components/ui/select";
-import { CountryKYC, Document } from "@/types";
+import { cn } from "@/lib/utils";
+import { AgencyIdentityKYCSchema } from "@/lib/validations";
 import {
   PreOnboardingData,
   useAgencyPeOnboardingAtom,
   verifyPersonalDetailsKYCAtom,
 } from "@/store/agency-pre-onboarding";
-import { useAtom } from "jotai";
-import { ENDPOINTS } from "@/components/shared/upload-zone";
-import UploadZone from "@/components/shared/upzone";
+import { CountryKYC, Document } from "@/types";
+import CustomFormField from "@/widgets/custom-form-field";
 // @flow
 type Props = {
   isLoading?: boolean;
 };
 export const AgencyPreOnboardingStepTwo = (props: Props) => {
-  const pathname = usePathname();
-  const { goToNextStep, setStep, step, goToPreviousStep } =
-    useAgencyPeOnboardingAtom();
+  const { goToNextStep } = useAgencyPeOnboardingAtom();
   const [data, setData] = useAtom(verifyPersonalDetailsKYCAtom);
   const [generalData, setGeneralData] = useAtom(PreOnboardingData);
 
@@ -52,7 +51,6 @@ export const AgencyPreOnboardingStepTwo = (props: Props) => {
     null
   );
   const [isPending, startTransition] = useTransition();
-  const { toast } = useToast();
   const form = useForm<z.infer<typeof AgencyIdentityKYCSchema>>({
     resolver: zodResolver(AgencyIdentityKYCSchema),
     defaultValues: {
@@ -158,7 +156,7 @@ export const AgencyPreOnboardingStepTwo = (props: Props) => {
     });
   };
   return (
-    <Card className="border-none bg-transparent outline-none focus-visible:ring-0 focus-visible:!ring-offset-0 shadow-none p-0 flex flex-col h-full   gap-8">
+    <Card className="flex h-full flex-col gap-8 border-none bg-transparent p-0 shadow-none outline-none focus-visible:ring-0   focus-visible:!ring-offset-0">
       <CardHeader className="p-0">
         <CardTitle>
           <h3 className="text-xl font-bold">Verify your identity - KYC</h3>
@@ -172,9 +170,9 @@ export const AgencyPreOnboardingStepTwo = (props: Props) => {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(handleSubmit)}
-          className="space-y-6 h-full justify-between flex flex-col"
+          className="flex h-full flex-col justify-between space-y-6"
         >
-          <CardContent className="p-0 space-y-6">
+          <CardContent className="space-y-6 p-0">
             <div className="grid grid-cols-12 gap-4">
               <div
                 className={cn(
@@ -295,11 +293,11 @@ export const AgencyPreOnboardingStepTwo = (props: Props) => {
               </div>
             )}
           </CardContent>
-          <CardFooter className="p-0  gap-4 mt-auto">
+          <CardFooter className="mt-auto  gap-4 p-0">
             <Button
               type="submit"
               disabled={isPending}
-              className=" w-full h-[48px] rounded-md text-sm hover:bg-primary-blackishGreen hover:text-white font-semibold text-primary-blackishGreen"
+              className=" h-[48px] w-full rounded-md text-sm font-semibold text-primary-blackishGreen hover:bg-primary-blackishGreen hover:text-white"
             >
               <Loader
                 className={cn(

@@ -1,25 +1,22 @@
 // @flow
 import * as React from "react";
-import { Card, CardHeader } from "../ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { Separator } from "../ui/separator";
+
+import { FlightSearchForm } from "../form/flight-search-form";
 import AirplaceIcon from "../icons/airplane";
 import StayIcon from "../icons/stay";
-import { FlightSearchForm } from "../form/flight-search-form";
 import ClientOnly from "../shared/client-only";
-import { RegionCountry } from "@/types";
-type Props = {
-  countries: RegionCountry[];
-};
-export const HomeSearch = (props: Props) => {
+import { Separator } from "../ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+
+export const HomeSearch = () => {
   return (
     <Tabs
       defaultValue="flight"
-      className="rounded-[16px] h-auto xxl:h-[280px] z-30 shadow-md bg-white px-[20px] lg:px-[32px] pt-4 pb-8"
+      className="z-30 h-auto rounded-[16px] bg-white px-[20px] pb-8 pt-4 shadow-md lg:px-[32px] xxl:h-[280px]"
     >
-      <TabsList className="bg-transparent mb-4">
+      <TabsList className="mb-4 bg-transparent">
         <TabsTrigger
-          className="py-3 !items-start pr-6 pl-1 data-[state=active]:shadow-none rounded-none data-[state=active]:border-b-[4px] data-[state=active]:border-b-primary"
+          className="!items-start rounded-none py-3 pl-1 pr-6 data-[state=active]:border-b-4 data-[state=active]:border-b-primary data-[state=active]:shadow-none"
           value="flight"
         >
           <p className="flex items-center gap-2">
@@ -27,9 +24,9 @@ export const HomeSearch = (props: Props) => {
             <span className="text-14_medium font-semibold">Flights</span>
           </p>
         </TabsTrigger>
-        <Separator orientation={"vertical"} className="ms-4 me-4" />
+        <Separator orientation={"vertical"} className="me-4 ms-4" />
         <TabsTrigger
-          className="py-3 !items-start pr-6  pl-1 data-[state=active]:shadow-none rounded-none data-[state=active]:border-b-[4px] data-[state=active]:border-b-primary"
+          className="!items-start rounded-none py-3  pl-1 pr-6 data-[state=active]:border-b-4 data-[state=active]:border-b-primary data-[state=active]:shadow-none"
           value="stay"
         >
           <p className="flex items-center gap-2">
@@ -41,7 +38,7 @@ export const HomeSearch = (props: Props) => {
       <TabsContent value="flight">
         <div className="py-3 lg:py-6">
           <ClientOnly>
-            <FlightSearchForm countries={props.countries} />
+            <FlightSearchForm />
           </ClientOnly>
         </div>
       </TabsContent>

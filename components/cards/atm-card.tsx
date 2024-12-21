@@ -1,20 +1,21 @@
 // @flow
 import * as React from "react";
-import { Card, CardFooter, CardHeader } from "../ui/card";
-import { Button } from "../ui/button";
+
 import BinIcon from "../icons/bin";
 import VisaIcon from "../icons/visa";
-type Props = {};
-export const AtmCard = (props: Props) => {
+import { Button } from "../ui/button";
+import { Card, CardFooter, CardHeader } from "../ui/card";
+
+export const AtmCard = () => {
   return (
-    <Card className="bg-primary border-none shadow-none outline-none rounded-[16px] p-4 h-[212px] flex flex-col justify-between items-start w-full">
-      <CardHeader className="p-0 w-full">
+    <Card className="flex h-[212px] w-full flex-col items-start justify-between rounded-[16px] border-none bg-primary p-4 shadow-none outline-none">
+      <CardHeader className="w-full p-0">
         <div className="flex items-start justify-between">
           <div>
-            <span className="text-2xl font-semibold font-mont text-primary-blackishGreen">
+            <span className="font-mont text-2xl font-semibold text-primary-blackishGreen">
               **** **** ****
             </span>
-            <h2 className="text-[32px] font-semibold font-mont text-primary-blackishGreen mt-1">
+            <h2 className="mt-1 font-mont text-[32px] font-semibold text-primary-blackishGreen">
               4321
             </h2>
           </div>
@@ -23,10 +24,10 @@ export const AtmCard = (props: Props) => {
           </Button>
         </div>
       </CardHeader>
-      <CardFooter className="p-0 flex items-center justify-between w-full">
+      <CardFooter className="flex w-full items-center justify-between p-0">
         <div>
-          <h6 className="text-xs font-mont font-medium">Valid Thru</h6>
-          <h2 className="text-xl font-semibold font-mont">02/27</h2>
+          <h6 className="font-mont text-xs font-medium">Valid Thru</h6>
+          <h2 className="font-mont text-xl font-semibold">02/27</h2>
         </div>
         <div>
           <VisaIcon />

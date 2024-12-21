@@ -1,20 +1,18 @@
 "use client";
-import React, {
-  useState,
-  useEffect,
-  useTransition,
-  useCallback,
-  useMemo,
-} from "react";
-import { AgencyEssentialDetailsSchema } from "@/lib/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useAtom } from "jotai";
+import { CheckCheckIcon, Loader, X } from "lucide-react";
+import React, { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
-import { useRouter } from "next/navigation";
-import CustomFormField from "@/widgets/custom-form-field";
-import { CreateUser } from "@/app/actions/user.actions";
-import { usePathname } from "next/navigation";
+import {
+  getAllAgencyPrefix,
+  PreAgencyOnboardingAction,
+} from "@/app/actions/agency.actions";
+import { FormFieldTypes } from "@/components/form/login-form";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -23,41 +21,29 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-import { CheckCheckIcon, Loader, X } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
 import { Form } from "@/components/ui/form";
-import { FormFieldTypes } from "@/components/form/login-form";
-import { useAtom } from "jotai";
+import { SelectItem } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/components/ui/use-toast";
+import { cn } from "@/lib/utils";
+import { AgencyEssentialDetailsSchema } from "@/lib/validations";
 import {
   agencyDetailsAtom,
   initialPreOnboardingData,
-  persoanlDetailsAtom,
   PreOnboardingData,
   useAgencyPeOnboardingAtom,
 } from "@/store/agency-pre-onboarding";
-import { SelectItem } from "@/components/ui/select";
-import {
-  getAllAgencyPrefix,
-  PreAgencyOnboardingAction,
-} from "@/app/actions/agency.actions";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import CustomFormField from "@/widgets/custom-form-field";
 // @flow
-type Props = {
-  isLoading?: boolean;
-};
-export const AgencyPreOnboardingStepThree = (props: Props) => {
+
+export const AgencyPreOnboardingStepThree = () => {
   const [data, setData] = useAtom(agencyDetailsAtom);
   const [loadingPrefix, setLoadingPrefix] = useState(false);
   const [prefixDbError, setprefixDbError] = useState(false);
   const [generalData, setGeneralData] = useAtom(PreOnboardingData);
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
-  const { goToNextStep, goToPreviousStep, setStep, step } =
-    useAgencyPeOnboardingAtom();
+  const { goToNextStep, goToPreviousStep } = useAgencyPeOnboardingAtom();
   const [generatedPrefix, setGeneratedPrefix] = useState<string[]>([]);
   const form = useForm<z.infer<typeof AgencyEssentialDetailsSchema>>({
     resolver: zodResolver(AgencyEssentialDetailsSchema),
@@ -266,7 +252,7 @@ export const AgencyPreOnboardingStepThree = (props: Props) => {
     // });
   };
   return (
-    <Card className="border-none bg-transparent outline-none focus-visible:ring-0 focus-visible:!ring-offset-0 shadow-none p-0 flex flex-col h-full   gap-8">
+    <Card className="flex h-full flex-col gap-8 border-none bg-transparent p-0 shadow-none outline-none focus-visible:ring-0   focus-visible:!ring-offset-0">
       <CardHeader className="p-0">
         <CardTitle>
           <h3 className="text-xl font-bold">Agency Details</h3>
@@ -279,7 +265,7 @@ export const AgencyPreOnboardingStepThree = (props: Props) => {
       </CardHeader>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6 ">
-          <CardContent className="p-0 space-y-6">
+          <CardContent className="space-y-6 p-0">
             <div className="grid grid-cols-12 gap-4">
               <div className="col-span-12 mmd:col-span-6">
                 <CustomFormField
@@ -349,25 +335,25 @@ export const AgencyPreOnboardingStepThree = (props: Props) => {
                 </CustomFormField>
               </div>
               {loadingPrefix && generatedPrefix.length === 0 ? (
-                <div className="flex items-center flex-wrap gap-2 col-span-12">
+                <div className="col-span-12 flex flex-wrap items-center gap-2">
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((ske) => (
                     <Skeleton
-                      className="w-24 h-5 rounded-md
+                      className="h-5 w-24 rounded-md
                     "
                       key={ske}
                     />
                   ))}
                 </div>
               ) : (
-                <div className="flex items-center flex-wrap gap-2 col-span-12">
+                <div className="col-span-12 flex flex-wrap items-center gap-2">
                   {generatedPrefix.length > 0 && (
-                    <div className="col-span-12 mb-4 flex flex-wrap gap-2 items-center w-full">
-                      {generatedPrefix.map((pref, i) => (
+                    <div className="col-span-12 mb-4 flex w-full flex-wrap items-center gap-2">
+                      {generatedPrefix.map((pref) => (
                         <Badge
                           onClick={() =>
                             form.setValue("agencyUniquePrefix", pref)
                           }
-                          className="bg-light-200 cursor-pointer hover:bg-primary-salmon text-black rounded-md"
+                          className="cursor-pointer rounded-md bg-light-200 text-black hover:bg-primary-salmon"
                           key={pref}
                         >
                           {pref}
@@ -440,11 +426,11 @@ export const AgencyPreOnboardingStepThree = (props: Props) => {
               </div>
             )}
           </CardContent>
-          <CardFooter className="p-0  gap-4 mt-auto">
+          <CardFooter className="mt-auto  gap-4 p-0">
             <Button
               type="button"
               disabled={isPending}
-              className="w-full h-[48px] bg-transparent border-2 border-primary rounded-md text-sm hover:bg-primary hover:text-white font-semibold text-primary-blackishGreen"
+              className="h-[48px] w-full rounded-md border-2 border-primary bg-transparent text-sm font-semibold text-primary-blackishGreen hover:bg-primary hover:text-white"
               onClick={goToPreviousStep}
             >
               {/* <Loader
@@ -459,7 +445,7 @@ export const AgencyPreOnboardingStepThree = (props: Props) => {
             <Button
               type="submit"
               disabled={isPending}
-              className=" w-full h-[48px] rounded-md text-sm hover:bg-primary-blackishGreen hover:text-white font-semibold text-primary-blackishGreen"
+              className=" h-[48px] w-full rounded-md text-sm font-semibold text-primary-blackishGreen hover:bg-primary-blackishGreen hover:text-white"
             >
               <Loader
                 className={cn(

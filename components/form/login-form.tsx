@@ -1,8 +1,24 @@
+/* eslint-disable no-unused-vars */
 "use client";
-import * as z from "zod";
-import { useForm } from "react-hook-form";
-import { LoginSchema } from "@/lib/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { User } from "@prisma/client";
+import { TriangleAlertIcon } from "lucide-react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+
+import { LoginByEmail } from "@/app/actions/user.actions";
+import { getAccountByUserId, getUserByEmail } from "@/data/user";
+import { LoginSchema } from "@/lib/validations";
+import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
+import { useAuthStore } from "@/store/authStore";
+import CustomPasswordInput from "@/widgets/password-widget";
+
+import AccountModal from "../cards/account-modal";
+import { Button } from "../ui/button";
+import { Checkbox } from "../ui/checkbox";
 import {
   Form,
   FormControl,
@@ -12,23 +28,7 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
-import { Checkbox } from "../ui/checkbox";
-import Link from "next/link";
-import { Button } from "../ui/button";
-import EyeIcon from "../icons/eye";
-import EyeOffIcon from "../icons/eye-off";
-import CustomPasswordInput from "@/widgets/password-widget";
-import { Label } from "../ui/label";
-import { useState, useTransition } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "../ui/use-toast";
-import { LoginByEmail } from "@/app/actions/user.actions";
-import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
-import { TriangleAlertIcon } from "lucide-react";
-import { getAccountByUserId, getUserByEmail } from "@/data/user";
-import { User } from "@prisma/client";
-import AccountModal from "../cards/account-modal";
-import { useAuthStore } from "@/store/authStore";
 
 export enum FormFieldTypes {
   INPUT = "input",
@@ -55,10 +55,10 @@ const LoginForm = () => {
   const router = useRouter();
   const { toast } = useToast();
 
-  const urlError =
-    searchParams.get("error") === "OAuthAccountNotLinked"
-      ? "Email already in use with different provider"
-      : "";
+  // const urlError =
+  //   searchParams.get("error") === "OAuthAccountNotLinked"
+  //     ? "Email already in use with different provider"
+  //     : "";
 
   const callbackUrl = searchParams.get("callbackUrl") ?? DEFAULT_LOGIN_REDIRECT;
   const form = useForm<z.infer<typeof LoginSchema>>({
@@ -118,8 +118,8 @@ const LoginForm = () => {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem className="">
-                    <div className="flex gap-1 items-center p-0 relative bg-white pr-[10px] h-[56px] border rounded-md ">
-                      <FormLabel className="absolute top-0 left-0 translate-x-3 mt-[-12px] bg-white px-2 py-1">
+                    <div className="relative flex h-[56px] items-center gap-1 rounded-md border bg-white p-0 pr-[10px] ">
+                      <FormLabel className="absolute left-0 top-0 mt-[-12px] translate-x-3 bg-white px-2 py-1">
                         Email
                       </FormLabel>
                       <FormControl>
@@ -127,7 +127,7 @@ const LoginForm = () => {
                           disabled={isPending}
                           placeholder="Enter your Email"
                           type="email"
-                          className="!bg-transparent !border-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                          className="!border-none !bg-transparent focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
                           {...field}
                         />
                       </FormControl>
@@ -151,7 +151,7 @@ const LoginForm = () => {
                   </FormItem>
                 )}
               />
-              <div className="flex justify-between items-center">
+              <div className="flex items-center justify-between">
                 <FormField
                   name="rememberMe"
                   control={form.control}
@@ -183,20 +183,20 @@ const LoginForm = () => {
                   </Link>
                 </Button>
               </div>
-              <div className="space-y-6 my-[14px] flex flex-col items-center w-full">
+              <div className="my-[14px] flex w-full flex-col items-center space-y-6">
                 {error && (
-                  <div className="bg-red-100 w-full rounded-md p-2 flex items-center gap-2">
+                  <div className="flex w-full items-center gap-2 rounded-md bg-red-100 p-2">
                     <TriangleAlertIcon className="size-5 text-red-600" />
                     <p className="text-sm text-red-600">{error}</p>
                   </div>
                 )}
                 <Button
                   disabled={isPending}
-                  className="w-full h-[48px] rounded-md text-sm hover:bg-primary-blackishGreen hover:text-white font-semibold text-primary-blackishGreen"
+                  className="h-[48px] w-full rounded-md text-sm font-semibold text-primary-blackishGreen hover:bg-primary-blackishGreen hover:text-white"
                 >
                   {isPending ? "Logging...." : "Sign In"}
                 </Button>
-                <p className="flex gap-1 text-center items-center text-14_medium text-primary-blackishGreen">
+                <p className="text-14_medium flex items-center gap-1 text-center text-primary-blackishGreen">
                   <span>Don&apos;t have an account?</span>{" "}
                   <Button asChild variant={"ghost"} disabled={isPending}>
                     <Link href="/auth/sign-up" className="text-primary-salmon">

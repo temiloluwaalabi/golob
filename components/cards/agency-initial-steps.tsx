@@ -1,6 +1,11 @@
 // @flow
 "use client";
+import { Loader } from "lucide-react";
 import * as React from "react";
+
+import { cn } from "@/lib/utils";
+
+import { Button } from "../ui/button";
 import {
   Card,
   CardContent,
@@ -9,16 +14,13 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import { Button } from "../ui/button";
-import { Loader } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 type Props = {
   isLoading?: boolean;
 };
 export const AgencyInitialSteps = (props: Props) => {
   return (
-    <Card className="border-none bg-transparent outline-none focus-visible:ring-0 focus-visible:!ring-offset-0 shadow-none p-0 flex flex-col h-full   gap-8">
+    <Card className="flex h-full flex-col gap-8 border-none bg-transparent p-0 shadow-none outline-none focus-visible:ring-0   focus-visible:!ring-offset-0">
       <CardHeader className="p-0">
         <CardTitle>
           <h3 className="text-xl font-bold">Verify your identity</h3>
@@ -32,8 +34,8 @@ export const AgencyInitialSteps = (props: Props) => {
       <CardContent className="p-0">
         <h2>te</h2>
       </CardContent>
-      <CardFooter className="p-0  gap-4 mt-auto">
-        <Button className="w-full h-[48px] bg-transparent border-2 border-primary rounded-md text-sm hover:bg-primary hover:text-white font-semibold text-primary-blackishGreen">
+      <CardFooter className="mt-auto  gap-4 p-0">
+        <Button className="h-[48px] w-full rounded-md border-2 border-primary bg-transparent text-sm font-semibold text-primary-blackishGreen hover:bg-primary hover:text-white">
           <Loader
             className={cn(
               "animate-spin size-4 me-2 hidden",
@@ -43,7 +45,7 @@ export const AgencyInitialSteps = (props: Props) => {
           {props.isLoading ? "Saving Draft..." : "Save Draft"}
         </Button>
         <div></div>
-        <Button className=" w-full h-[48px] rounded-md text-sm hover:bg-primary-blackishGreen hover:text-white font-semibold text-primary-blackishGreen">
+        <Button className=" h-[48px] w-full rounded-md text-sm font-semibold text-primary-blackishGreen hover:bg-primary-blackishGreen hover:text-white">
           <Loader
             className={cn(
               "animate-spin size-4 me-2 hidden",
