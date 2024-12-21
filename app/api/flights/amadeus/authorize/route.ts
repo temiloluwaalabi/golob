@@ -48,6 +48,6 @@ export async function GET() {
       }
     );
   } catch (error) {
-    return handleError(error, "api");
+    return handleError(error, "api") as ApiErrorResponse;
   }
 }
