@@ -195,3 +195,11 @@ export const maskEmail = (email: string) => {
 export const maskString = (str: string) => {
   return str.substring(0, 2) + "●●●●";
 };
+export function formatDateToYMD(mDate: Date): string {
+  const date = new Date(mDate);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-based
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}

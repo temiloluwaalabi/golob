@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 export enum Region {
   Africa = "Africa",
   Asia = "Asia",
@@ -31,12 +32,17 @@ export interface Continent {
   name: string | null; // Continents can have null names
   countries: Country[];
 }
-type UniqueLocation = {
+export type UniqueLocation = {
   name: string | null; // Name of the state or municipality
   country: string | null; // Name of the country
   continent: string | null; // Name of the continent
 };
-
+export type PopularLocation = {
+  name: string | null; // Name of the state or municipality
+  country: string | null; // Name of the country
+  continent: string | null; // Name of the continent
+  iataCodes: string[];
+};
 export type UniqueStates = UniqueLocation[];
 export type UniqueMunicipalities = UniqueLocation[];
 

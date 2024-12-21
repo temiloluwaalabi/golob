@@ -16,7 +16,10 @@ import {
   Plus,
   Search,
   Send,
+  X,
 } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import qs from "query-string";
 import * as React from "react";
 import { useState } from "react";
 import { DateRange } from "react-day-picker";
@@ -30,9 +33,15 @@ import {
 import { cabinWay, countriesDest, tripWay } from "@/constants";
 import useDebounce from "@/hooks/use-debouce";
 import { NotFoundError } from "@/lib/http-errors";
-import { cn } from "@/lib/utils";
+import { cn, formatDateToYMD } from "@/lib/utils";
 import { FligthSearchSchema } from "@/lib/validations";
-import { Continent, SearchResults, UniqueStates } from "@/types/main";
+import {
+  Continent,
+  PopularLocation,
+  SearchResults,
+  UniqueLocation,
+  UniqueStates,
+} from "@/types/main";
 
 import Counter from "../shared/counter";
 import { Badge } from "../ui/badge";
@@ -61,13 +70,34 @@ import {
 //   countries: RegionCountry[];
 // };
 
+export const useQueryParams = <
+  T extends Record<string, string | string[]>
+>(): T => {
+  const searchParams = useSearchParams();
+  const params: Record<string, string | string[] | null> = {};
+
+  for (const [key, value] of searchParams.entries()) {
+    if (value.includes(",")) {
+      params[key] = value.split(",");
+    } else {
+      params[key] = value;
+    }
+  }
+
+  return params as T;
+};
+
 export const FlightSearchForm = () => {
   const [searchQuery, setSearchQuery] = React.useState<string>("");
+  const [destinationSearch, setDestinationSearch] = React.useState<string>("");
   const [tripWayType, setTripWayType] = useState("round-trip");
   const [flightClass, setFlightClass] = useState("");
   const [openLeavingFrom, setOpenLeavingFrom] = useState(false);
   const [openGoingTo, setOpenGoingTo] = useState(false);
   const [currentLocation, setCurrentLocation] = useState("");
+
+  const router = useRouter();
+  const queryParams: Record<string, string | null> = {};
 
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = React.useTransition();
@@ -76,13 +106,11 @@ export const FlightSearchForm = () => {
   const [openDateCalendar, setOpenDateCalendar] = useState(false);
   const [openFlightClass, setOpenFlightClass] = useState(false);
   const [openTripWay, setOpenTripWay] = useState(false);
-  const [adultCount, setAdultCount] = useState(0);
+  const [adultCount, setAdultCount] = useState(1);
   const [totalPassengers, settotalPassengers] = useState(0);
   const [teenagersCount, setTeenagersCount] = useState(0);
   const [infantsCount, setInfantsCount] = useState(0);
-
   // const [takeOffAirport, setTakeOffAirport] = useState<Partial<Airport[]>>();
-
   const [date, setDate] = useState<DateRange | undefined>({
     from: new Date(),
     to: addDays(new Date(), 20),
@@ -92,13 +120,19 @@ export const FlightSearchForm = () => {
   const [continents, setContinents] = useState<Continent[]>([]);
   const [statesData, setStatesData] = useState<UniqueStates>([]);
   const [airports, setAirports] = useState<Airport[]>();
+
   const [searchResults, setSearchResults] = useState<SearchResults>();
+  const [searchDesResults, setSearchDesResults] = useState<SearchResults>();
 
   const form = useForm<z.infer<typeof FligthSearchSchema>>({
     resolver: zodResolver(FligthSearchSchema),
     defaultValues: {
+      tripType: "round-trip",
+      departureDate: new Date(),
+      arrivalDate: addDays(new Date(), 10),
       passengers: {
         adults: adultCount,
+        class: "economy",
         teenagers: teenagersCount,
         infants: infantsCount,
       },
@@ -152,9 +186,10 @@ export const FlightSearchForm = () => {
   }, []);
 
   const debouncedSearchQuery = useDebounce(searchQuery, 300); // Debounce by 300ms
+  const debouncedDesSearchQuery = useDebounce(destinationSearch, 300); // Debounce by 300ms
 
   // get popular states
-  const getPopularStates = (continentName: string) => {
+  const getPopularStates = (continentName: string, airports: Airport[]) => {
     const continent = continents.find(
       (c) => c.name?.toLowerCase() === continentName.toLowerCase()
     );
@@ -164,7 +199,7 @@ export const FlightSearchForm = () => {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let popularStates: any[] = [];
+    let popularStates: PopularLocation[] = [];
 
     continent.countries.forEach((countryName) => {
       if (countryName) {
@@ -175,7 +210,22 @@ export const FlightSearchForm = () => {
         );
         const numPopularStates = Math.min(3, countryStates.length); // Get at most 3 popular states per country
         const selectedStates = countryStates.slice(0, numPopularStates);
-        popularStates = popularStates.concat(selectedStates);
+
+        const statesWithIata = selectedStates.map((state) => {
+          const matchingAirports = airports.filter(
+            (airport) =>
+              airport.state?.toLowerCase() === state.name?.toLocaleLowerCase()
+          );
+
+          const iataCodes = matchingAirports.map((airport) => airport.iata);
+
+          return {
+            ...state,
+            iataCodes,
+          };
+        });
+
+        popularStates = popularStates.concat(statesWithIata);
       }
     });
 
@@ -252,6 +302,29 @@ export const FlightSearchForm = () => {
   };
   const handleSubmit = async (values: z.infer<typeof FligthSearchSchema>) => {
     console.log(values);
+    let searchParams;
+    searchParams = {
+      originLocationCode: values.takeOff,
+      destinationLocationCode: values.destination,
+      departureDate: formatDateToYMD(values.departureDate),
+      adults: values.passengers.adults,
+      children: values.passengers.teenagers,
+      infants: values.passengers.infants,
+      travelClass: values.passengers.class,
+    };
+
+    if (values.arrivalDate) {
+      searchParams = {
+        ...searchParams,
+        returnDate: formatDateToYMD(values.arrivalDate),
+      };
+    }
+
+    const queryString = qs.stringify(searchParams, { skipNull: true });
+    const url = `/flights?${queryString}`;
+
+    console.log("URL", url);
+    router.push(url);
   };
 
   const hasSearchResults =
@@ -260,6 +333,14 @@ export const FlightSearchForm = () => {
     (searchResults.countries.length > 0 ||
       searchResults.states.length > 0 ||
       searchResults.airports.length > 0);
+
+  const hasDesSearchResults =
+    destinationSearch &&
+    searchDesResults &&
+    (searchDesResults.countries.length > 0 ||
+      searchDesResults.states.length > 0 ||
+      searchDesResults.airports.length > 0);
+
   return (
     <Form {...form}>
       <form
@@ -280,22 +361,65 @@ export const FlightSearchForm = () => {
                     <PopoverTrigger className="w-full">
                       <div
                         className={cn(
-                          " flex gap-1 cursor-pointer items-center p-0 pl-2 pt-1 relative bg-white pr-[10px] h-[56px] border rounded-md ",
+                          " flex gap-1 cursor-pointer items-center p-0 pl-2 relative bg-white pr-[10px] h-[56px] border rounded-md ",
                           openLeavingFrom && "border-b-[3px] border-b-primary"
                         )}
                       >
-                        <FormLabel className="absolute left-0 top-0 mt-[-12px] translate-x-3 bg-white px-2 py-1 font-mont text-sm font-normal">
+                        {/* <FormLabel className="absolute left-0 top-0 mt-[-12px] translate-x-3 bg-white px-2 py-1 font-mont text-sm font-normal">
                           Leaving From
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            disabled={isPending}
-                            placeholder="Leaving From"
-                            type="text"
-                            className="cursor-pointer !border-none !bg-transparent font-mont text-base font-normal focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
-                            {...field}
-                          />
-                        </FormControl>
+                        </FormLabel> */}
+                        <div className="flex rounded-md">
+                          {field.value && airports && (
+                            <div className="relative flex w-full flex-col items-start bg-green-200 px-2">
+                              <Button
+                                onClick={() => form.setValue("takeOff", "")}
+                                type="button"
+                                variant={"outline"}
+                                size={"icon"}
+                                className="absolute right-0 top-0 mr-1 mt-1 size-3 border-none bg-primary-blackishGreen text-white shadow-none outline-none"
+                              >
+                                <X className="size-2" />
+                              </Button>
+                              <span className="flex items-center gap-2 overflow-hidden whitespace-nowrap">
+                                <span className="text-14 text-ellipsis font-semibold">
+                                  {
+                                    airports.find(
+                                      (airport) => airport.iata === field.value
+                                    )?.state
+                                  }
+                                </span>
+                                <span className="text-xs font-normal">
+                                  {
+                                    airports.find(
+                                      (airport) => airport.iata === field.value
+                                    )?.iata
+                                  }{" "}
+                                </span>
+                              </span>
+                              <span className="w-full overflow-hidden whitespace-nowrap text-left text-xs">
+                                {
+                                  airports.find(
+                                    (airport) => airport.iata === field.value
+                                  )?.name
+                                }
+                              </span>
+                            </div>
+                          )}
+                          <FormControl>
+                            <Input
+                              disabled={isPending}
+                              placeholder={field.value ? "" : "Leaving From"}
+                              type="text"
+                              className=" cursor-pointer !border-none !bg-transparent font-mont text-base font-normal focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                              value={field.value ? "" : ""}
+                              onChange={(e) => {
+                                e.preventDefault();
+                                setSearchQuery(e.target.value);
+                                setOpenLeavingFrom(true);
+                              }}
+                            />
+                          </FormControl>
+                        </div>
                       </div>
                     </PopoverTrigger>
                     <PopoverContent
@@ -371,9 +495,15 @@ export const FlightSearchForm = () => {
                                       {countryName.airports.map(
                                         (airport, i) => (
                                           <span
+                                            onClick={() =>
+                                              handleCityClick(
+                                                field.name,
+                                                airport.code
+                                              )
+                                            }
                                             key={`${airport.code} - ${i}`}
                                             className={cn(
-                                              "flex text-gray-600 items-start gap-1 py-4 border-b",
+                                              "cursor-pointer flex text-gray-600 items-start gap-1 py-4 border-b hover:bg-white",
                                               i ===
                                                 countryName.airports.length -
                                                   1 && "border-none"
@@ -434,8 +564,14 @@ export const FlightSearchForm = () => {
                                       {state.airports.map((airport) => (
                                         <span
                                           key={`${airport.code} - ${i} - star`}
+                                          onClick={() =>
+                                            handleCityClick(
+                                              field.name,
+                                              airport.code
+                                            )
+                                          }
                                           className={cn(
-                                            "flex text-gray-600 items-start gap-1 py-4 border-b",
+                                            "cursor-pointer flex hover:bg-white text-gray-600 items-start gap-1 py-4 border-b",
                                             i === state.airports.length - 1 &&
                                               "border-none"
                                           )}
@@ -457,8 +593,11 @@ export const FlightSearchForm = () => {
                               searchResults?.airports.map((airport, i) => (
                                 <div
                                   key={airport.name}
+                                  onClick={() =>
+                                    handleCityClick(field.name, airport.code)
+                                  }
                                   className={cn(
-                                    "border-b flex items-start justify-start bg-accent w-full py-4 px-3",
+                                    "border-b cursor-pointer hover:bg-white flex items-start justify-start bg-accent w-full py-4 px-3",
                                     !searchResults.countries &&
                                       !searchResults.states &&
                                       i === searchResults.airports.length - 1 &&
@@ -506,24 +645,25 @@ export const FlightSearchForm = () => {
                                 </CardHeader>
                                 <CardContent className="p-0 px-3 py-6">
                                   <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
-                                    {getPopularStates(country.name!).map(
-                                      (city) => (
+                                    {airports &&
+                                      getPopularStates(
+                                        country.name!,
+                                        airports
+                                      ).map((city) => (
                                         <Badge
                                           className="cursor-pointer rounded-md bg-light-700 px-5 py-2 font-light text-black/80 hover:bg-light-800 "
-                                          key={city.id}
+                                          key={city.name}
                                           onClick={() => {
-                                            setSearchQuery(city.name);
-                                            // handleCityClick(
-                                            //   field.name,
-                                            //   city.name
-                                            // );
+                                            handleCityClick(
+                                              field.name,
+                                              city.iataCodes[0]
+                                            );
                                             // setOpenLeavingFrom(false);
                                           }}
                                         >
                                           {city.name}
                                         </Badge>
-                                      )
-                                    )}
+                                      ))}
                                   </div>
                                 </CardContent>
                               </Card>
@@ -553,63 +693,326 @@ export const FlightSearchForm = () => {
               name="destination"
               control={form.control}
               render={({ field }) => (
-                <FormItem className="relative w-full">
+                <FormItem className="w-full">
                   <Popover open={openGoingTo} onOpenChange={setOpenGoingTo}>
                     <PopoverTrigger className="w-full">
                       <div
                         className={cn(
-                          " flex gap-1 cursor-pointer items-center p-0 pl-2 pt-1 relative bg-white pr-[10px] h-[56px] border rounded-md ",
+                          " flex gap-1 cursor-pointer items-center p-0 pl-2 relative bg-white pr-[10px] h-[56px] border rounded-md ",
                           openGoingTo && "border-b-[3px] border-b-primary"
                         )}
                       >
-                        <FormLabel className="absolute left-0 top-0 mt-[-12px] translate-x-3 bg-white px-2 py-1 font-mont text-sm font-normal">
-                          Going To
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            // disabled={isPending}
-                            placeholder="Going To"
-                            type="text"
-                            className="cursor-pointer !border-none !bg-transparent font-mont text-base font-normal focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
-                            {...field}
-                          />
-                        </FormControl>
+                        {/* <FormLabel className="absolute left-0 top-0 mt-[-12px] translate-x-3 bg-white px-2 py-1 font-mont text-sm font-normal">
+                        Leaving From
+                      </FormLabel> */}
+                        <div className="flex rounded-md">
+                          {field.value && airports && (
+                            <div className="relative flex w-full flex-col items-start bg-green-200 px-2">
+                              <Button
+                                onClick={() => form.setValue("destination", "")}
+                                type="button"
+                                variant={"outline"}
+                                size={"icon"}
+                                className="absolute right-0 top-0 mr-1 mt-1 size-3 border-none bg-primary-blackishGreen text-white shadow-none outline-none"
+                              >
+                                <X className="size-2" />
+                              </Button>
+                              <span className="flex items-center gap-2 overflow-hidden whitespace-nowrap">
+                                <span className="text-14 text-ellipsis font-semibold">
+                                  {
+                                    airports.find(
+                                      (airport) => airport.iata === field.value
+                                    )?.state
+                                  }
+                                </span>
+                                <span className="text-xs font-normal">
+                                  {
+                                    airports.find(
+                                      (airport) => airport.iata === field.value
+                                    )?.iata
+                                  }{" "}
+                                </span>
+                              </span>
+                              <span className="w-full overflow-hidden whitespace-nowrap text-left text-xs">
+                                {
+                                  airports.find(
+                                    (airport) => airport.iata === field.value
+                                  )?.name
+                                }
+                              </span>
+                            </div>
+                          )}
+                          <FormControl>
+                            <Input
+                              disabled={isPending}
+                              placeholder={field.value ? "" : "Going To"}
+                              type="text"
+                              className=" cursor-pointer !border-none !bg-transparent font-mont text-base font-normal focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0"
+                              value={field.value ? "" : ""}
+                              onChange={(e) => {
+                                e.preventDefault();
+                                setDestinationSearch(e.target.value);
+                                setOpenGoingTo(true);
+                              }}
+                            />
+                          </FormControl>
+                        </div>
                       </div>
                     </PopoverTrigger>
                     <PopoverContent
                       align={"start"}
                       side={"bottom"}
                       sideOffset={3}
-                      className="my-3 w-full  max-w-[245px] p-0 xs:max-w-[350px] sm:max-w-[350px] md:max-w-[420px] lg:max-w-[650px]"
+                      className="my-3 w-full max-w-full p-0 xs:max-w-[350px] sm:max-w-[350px] md:max-w-[420px] lg:max-w-[500px]"
                     >
-                      <ScrollArea className="h-[350px] md:h-[420px] lg:h-full">
-                        {countriesDest.map((country, i) => (
-                          <Card
-                            key={`${country.continent} - ${i} - coDes`}
-                            className="border-none p-0 shadow-none"
-                          >
-                            <CardHeader className="text-14_medium rounded-se-md rounded-ss-md bg-light-800 p-0 px-3 py-2 font-medium text-primary-blackishGreen/40">
-                              {country.continent}
-                            </CardHeader>
-                            <CardContent className="p-0 px-3 py-6">
-                              <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
-                                {country.cities.map((city) => (
-                                  <Badge
-                                    className="cursor-pointer rounded-md bg-light-700 px-5 py-2 font-light text-black/80 hover:bg-light-800 "
-                                    key={city}
-                                    onClick={() => {
-                                      handleCityClick(field.name, city);
-                                      setOpenGoingTo(false);
-                                    }}
+                      <div className="border-b p-2">
+                        <div className="relative flex h-12 w-full items-center rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors">
+                          <Search className="mr-2 size-4 shrink-0  opacity-50" />
+                          <Input
+                            placeholder="Going To..."
+                            value={destinationSearch}
+                            onChange={(e) => {
+                              e.preventDefault();
+                              setDestinationSearch(e.target.value);
+                              if (airports && airports.length > 0) {
+                                const results = getSearchResults(
+                                  debouncedDesSearchQuery,
+                                  airports
+                                );
+                                setSearchDesResults(results);
+                              }
+                            }}
+                            className="no-focus h-10 border-none p-0 shadow-none outline-none"
+                          />
+                        </div>
+                      </div>
+                      <ScrollArea className="h-[350px] w-full md:h-[420px] lg:h-[500px]">
+                        {hasDesSearchResults ? (
+                          <div className=" py-2">
+                            {searchDesResults?.countries?.length > 0 &&
+                              searchDesResults?.countries.map(
+                                (countryName, i) => {
+                                  const isOpen = openIndex === i;
+                                  return (
+                                    <Collapsible
+                                      key={countryName.name}
+                                      open={isOpen}
+                                      onOpenChange={(newState) =>
+                                        handleOpenChange(i, newState)
+                                      }
+                                    >
+                                      <CollapsibleTrigger
+                                        className={cn(
+                                          "border-b flex items-start justify-start bg-accent w-full py-4 px-3",
+                                          !searchDesResults.states &&
+                                            !searchDesResults.airports &&
+                                            i ===
+                                              searchDesResults.countries
+                                                .length -
+                                                1 &&
+                                            "border-none"
+                                        )}
+                                      >
+                                        <Earth className="me-2 mt-1 size-4" />
+
+                                        <div className="!m-0 flex flex-col items-start justify-start !p-0 font-medium text-blue-800">
+                                          <span>{countryName.name}</span>
+                                          <span className="text-xs font-normal text-gray-500">
+                                            {countryName.name}
+                                          </span>
+                                        </div>
+
+                                        <ChevronDown
+                                          strokeWidth={3}
+                                          className={cn(
+                                            "size-3 -rotate-90 ml-auto text-gray-500 transition-transform duration-200 rtl:rotate-90",
+                                            isOpen && "rotate-0 rtl:rotate-0"
+                                          )}
+                                        />
+                                      </CollapsibleTrigger>
+                                      <CollapsibleContent className="pl-10">
+                                        {countryName.airports.map(
+                                          (airport, i) => (
+                                            <span
+                                              onClick={() =>
+                                                handleCityClick(
+                                                  field.name,
+                                                  airport.code
+                                                )
+                                              }
+                                              key={`${airport.code} - ${i}`}
+                                              className={cn(
+                                                "cursor-pointer flex text-gray-600 items-start gap-1 py-4 border-b hover:bg-white",
+                                                i ===
+                                                  countryName.airports.length -
+                                                    1 && "border-none"
+                                              )}
+                                            >
+                                              <Plane className="me-2 mt-1 size-4" />
+                                              <span className="max-w-[250px] text-ellipsis">
+                                                {airport.name} Airport
+                                              </span>
+                                              <span className="ms-4 mt-1 text-xs font-normal">
+                                                {airport.code}
+                                              </span>
+                                            </span>
+                                          )
+                                        )}
+                                      </CollapsibleContent>
+                                    </Collapsible>
+                                  );
+                                }
+                              )}
+                            {searchDesResults?.states?.length > 0 &&
+                              searchDesResults?.states.map((state, i) => {
+                                const isOpen = openStateIndex === i;
+
+                                return (
+                                  <Collapsible
+                                    key={state.name}
+                                    open={isOpen}
+                                    onOpenChange={(newState) =>
+                                      handleOpenStateChange(i, newState)
+                                    }
                                   >
-                                    {city}
-                                  </Badge>
-                                ))}
+                                    <CollapsibleTrigger
+                                      className={cn(
+                                        "border-b flex items-start justify-start bg-accent w-full py-4 px-3 m-0",
+                                        !searchDesResults.countries &&
+                                          !searchDesResults.airports &&
+                                          i ===
+                                            searchDesResults.states.length -
+                                              1 &&
+                                          "border-none"
+                                      )}
+                                    >
+                                      <Landmark className="me-2 mt-1 size-4" />
+                                      <div className="!m-0 flex flex-col items-start justify-start !p-0 font-medium text-blue-800">
+                                        <span>{state.name} State</span>
+                                        <span className="text-xs font-normal text-gray-500">
+                                          {state.name} State, {state.country}
+                                        </span>
+                                      </div>
+                                      <ChevronDown
+                                        strokeWidth={3}
+                                        className={cn(
+                                          "size-3 -rotate-90 ml-auto text-gray-500 transition-transform duration-200 rtl:rotate-90",
+                                          isOpen && "rotate-0 rtl:rotate-0"
+                                        )}
+                                      />
+                                    </CollapsibleTrigger>
+                                    <CollapsibleContent className="pl-10">
+                                      {state.airports.map((airport) => (
+                                        <span
+                                          key={`${airport.code} - ${i} - star`}
+                                          onClick={() =>
+                                            handleCityClick(
+                                              field.name,
+                                              airport.code
+                                            )
+                                          }
+                                          className={cn(
+                                            "cursor-pointer flex hover:bg-white text-gray-600 items-start gap-1 py-4 border-b",
+                                            i === state.airports.length - 1 &&
+                                              "border-none"
+                                          )}
+                                        >
+                                          <Plane className="me-2 mt-1 size-4" />
+                                          <span className="max-w-[250px] text-ellipsis">
+                                            {airport.name} Airport
+                                          </span>
+                                          <span className="ms-4 mt-1 text-xs font-normal">
+                                            {airport.code}
+                                          </span>
+                                        </span>
+                                      ))}
+                                    </CollapsibleContent>
+                                  </Collapsible>
+                                );
+                              })}
+                            {searchDesResults?.airports?.length > 0 &&
+                              searchDesResults?.airports.map((airport, i) => (
+                                <div
+                                  key={airport.name}
+                                  onClick={() =>
+                                    handleCityClick(field.name, airport.code)
+                                  }
+                                  className={cn(
+                                    "border-b cursor-pointer hover:bg-white flex items-start justify-start bg-accent w-full py-4 px-3",
+                                    !searchDesResults.countries &&
+                                      !searchDesResults.states &&
+                                      i ===
+                                        searchDesResults.airports.length - 1 &&
+                                      "border-none"
+                                  )}
+                                >
+                                  <Plane className="me-2 mt-1 size-4" />
+                                  <div className="flex flex-col gap-1">
+                                    <span>
+                                      <span className="max-w-[250px] text-ellipsis">
+                                        {airport.name} Airport
+                                      </span>
+                                      <span className="ms-2 text-xs font-normal">
+                                        {airport.code}
+                                      </span>
+                                    </span>
+                                    <span className="text-xs font-normal text-gray-500">
+                                      {airport.state} State, {airport.country}
+                                    </span>
+                                  </div>
+                                </div>
+                              ))}
+                          </div>
+                        ) : (
+                          <>
+                            {currentLocation && (
+                              <div className="space-y-3 px-3 py-4">
+                                <h5 className="text-sm font-medium">
+                                  Current Location
+                                </h5>
+                                <h2 className="m-0 flex items-start gap-2 text-sm font-normal">
+                                  <MapPin className="me-2 mt-1 size-4 text-black" />{" "}
+                                  {currentLocation}
+                                </h2>
                               </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                        <ScrollBar orientation="vertical" />
+                            )}
+                            {/* Replace with actual current location */}
+                            {continents.map((country, i) => (
+                              <Card
+                                key={`${country.name} - ${i} - rconcoun`}
+                                className="border-none p-0 shadow-none"
+                              >
+                                <CardHeader className="text-14_medium bg-light-800 p-0 px-3 py-2 font-medium text-primary-blackishGreen/40">
+                                  {country.name}
+                                </CardHeader>
+                                <CardContent className="p-0 px-3 py-6">
+                                  <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
+                                    {airports &&
+                                      getPopularStates(
+                                        country.name!,
+                                        airports
+                                      ).map((city) => (
+                                        <Badge
+                                          className="cursor-pointer rounded-md bg-light-700 px-5 py-2 font-light text-black/80 hover:bg-light-800 "
+                                          key={city.name}
+                                          onClick={() => {
+                                            handleCityClick(
+                                              field.name,
+                                              city.iataCodes[0]
+                                            );
+                                            // setOpenLeavingFrom(false);
+                                          }}
+                                        >
+                                          {city.name}
+                                        </Badge>
+                                      ))}
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            ))}
+                          </>
+                        )}
+                        <ScrollBar orientation={"vertical"} />
                       </ScrollArea>
                     </PopoverContent>
                   </Popover>

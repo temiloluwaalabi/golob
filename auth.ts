@@ -1,10 +1,10 @@
-import NextAuth, { DefaultSession } from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { db } from "./lib/db";
-import authConfig from "./auth.config";
-import { getAccountByUserId, getUserByEmail, getUserByID } from "./data/user";
 import { UserRole } from "@prisma/client";
-import { api } from "./lib/api";
+import NextAuth, { DefaultSession } from "next-auth";
+
+import authConfig from "./auth.config";
+import { getAccountByUserId, getUserByID } from "./data/user";
+import { db } from "./lib/db";
 
 declare module "next-auth" {
   interface Session {
@@ -97,7 +97,7 @@ export const {
       }
     },
     async session({ session, token }) {
-      // console.log("SESSION", token);
+      console.log("SESSION", token);
       if (token.sub) {
         session.user = {
           ...session.user,
@@ -112,7 +112,7 @@ export const {
       }
       return session;
     },
-    async jwt({ token, account }) {
+    async jwt({ token }) {
       // console.log("JWT", token);
       if (!token.sub) return token;
       // if (account) {
