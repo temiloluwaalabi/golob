@@ -1,5 +1,11 @@
+/* eslint-disable no-unused-vars */
 "use client";
+import { atom, useAtom } from "jotai";
+import { atomWithReset, atomWithStorage } from "jotai/utils";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import * as z from "zod";
+
 import { AgencyPreOnboardingFinal } from "@/components/onboarding/agency/agency-pre-step-five";
 import { AgencyPreOnboardingStepFour } from "@/components/onboarding/agency/agency-pre-step-four";
 import { AgencyPreOnboardingStepOne } from "@/components/onboarding/agency/agency-pre-step-one";
@@ -7,7 +13,6 @@ import { AgencyPreOnboardingStepThree } from "@/components/onboarding/agency/age
 import { AgencyPreOnboardingStepTwo } from "@/components/onboarding/agency/agency-pre-step-two";
 import ClientOnly from "@/components/shared/client-only";
 import HorizontalStepper from "@/components/shared/horizontal-stepper";
-import ProgressBarWithButtons from "@/components/shared/progress-bar-with-buttons";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -18,10 +23,6 @@ import {
 } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { atom, useAtom } from "jotai";
-import { atomWithReset, atomWithStorage } from "jotai/utils";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import { GeneralPreOnboardingSchema } from "@/lib/validations";
 
 interface PersonalDetails {
@@ -92,11 +93,11 @@ export const initialPreOnboardingData: z.infer<
       name: "",
       url: "",
       size: 0,
-      key: "" || undefined,
+      key: undefined,
     },
   ],
   addressLineOne: "",
-  addressLineTwo: "" || undefined,
+  addressLineTwo: undefined,
   city: "",
   state: "",
   addressProofType: "",
@@ -106,12 +107,12 @@ export const initialPreOnboardingData: z.infer<
       name: "",
       url: "",
       size: 0,
-      key: "" || undefined,
+      key: undefined,
     },
   ],
   agencyName: "",
-  legalBusinessName: "" || undefined,
-  rcNumber: "" || undefined,
+  legalBusinessName: undefined,
+  rcNumber: undefined,
   agencyEmail: "",
   agencyUniquePrefix: "",
   businessType: "",
@@ -140,13 +141,13 @@ export const verifyPersonalDetailsKYCAtom = atom<PersonalDetailsKYC>({
       name: "",
       url: "",
       size: 0,
-      key: "" || undefined,
+      key: undefined,
     },
   ],
 });
 export const verifyPersonalAddressAtom = atom<PersonalAddress>({
   addressLineOne: "",
-  addressLineTwo: "" || undefined,
+  addressLineTwo: undefined,
   city: "",
   state: "",
   addressProofType: "",
@@ -156,14 +157,14 @@ export const verifyPersonalAddressAtom = atom<PersonalAddress>({
       name: "",
       url: "",
       size: 0,
-      key: "" || undefined,
+      key: undefined,
     },
   ],
 });
 export const agencyDetailsAtom = atom<AgencyDetails>({
   agencyName: "",
-  legalBusinessName: "" || undefined,
-  rcNumber: "" || undefined,
+  legalBusinessName: undefined,
+  rcNumber: undefined,
   agencyEmail: "",
   agencyUrl: "",
   businessType: "",
@@ -242,7 +243,7 @@ export const AgencyPreOnboardingMultiStep = () => {
   const [step] = useAtom(AgencyPreOnboardingAtom);
   const [openDialog, setOpenDialog] = useState(false);
   const Component = MAP_STEP_TO_COMPONENT[step];
-  const { goToPreviousStep, goToNextStep } = useAgencyPeOnboardingAtom();
+  // const { goToPreviousStep, goToNextStep } = useAgencyPeOnboardingAtom();
   const user = useCurrentUser();
   const router = useRouter();
 
@@ -255,9 +256,9 @@ export const AgencyPreOnboardingMultiStep = () => {
   //   clientUser: any
   // }
   return (
-    <div className="w-full flex items-center justify-center">
-      <div className="h-fit bg-white shadow rounded-[10px] p-2 grid grid-cols-12 gap-2 w-full lg:w-[1000px]">
-        <div className="bg-[#fcfcfc] border flex flex-col justify-between rounded-[10px] col-span-8 py-8 px-6 w-full">
+    <div className="flex w-full items-center justify-center">
+      <div className="grid h-fit w-full grid-cols-12 gap-2 rounded-[10px] bg-white p-2 shadow lg:w-[1000px]">
+        <div className="col-span-8 flex w-full flex-col justify-between rounded-[10px] border bg-[#fcfcfc] px-6 py-8">
           <HorizontalStepper
             currentStep={step}
             totalSteps={agencyPreOnboardingTotalSteps}
@@ -282,10 +283,10 @@ export const AgencyPreOnboardingMultiStep = () => {
           {/* <h2>Agency Essentials</h2>
           <h3>KYC Documents</h3> */}
         </div>
-        <div className="bg-white border rounded-[10px] flex flex-col gap-4 col-span-4 py-8 px-6 w-full">
+        <div className="col-span-4 flex w-full flex-col gap-4 rounded-[10px] border bg-white px-6 py-8">
           <div className="flex items-center gap-4 ">
             <div className="">
-              <div className="size-12 rounded-full flex items-center justify-center bg-primary text-white">
+              <div className="flex size-12 items-center justify-center rounded-full bg-primary text-white">
                 <h1 className="text-lg font-bold">1</h1>
               </div>
             </div>
@@ -298,7 +299,7 @@ export const AgencyPreOnboardingMultiStep = () => {
           </div>
           <div className="flex items-center gap-4 ">
             <div className="">
-              <div className="size-12 rounded-full flex items-center justify-center bg-primary text-white">
+              <div className="flex size-12 items-center justify-center rounded-full bg-primary text-white">
                 <h1 className="text-lg font-bold">2</h1>
               </div>
             </div>
@@ -311,7 +312,7 @@ export const AgencyPreOnboardingMultiStep = () => {
           </div>
           <div className="flex items-center gap-4 ">
             <div className="">
-              <div className="size-12 rounded-full flex items-center justify-center bg-primary text-white">
+              <div className="flex size-12 items-center justify-center rounded-full bg-primary text-white">
                 <h1 className="text-lg font-bold">3</h1>
               </div>
             </div>
@@ -326,7 +327,7 @@ export const AgencyPreOnboardingMultiStep = () => {
           </div>
           <div className="flex items-center gap-4 ">
             <div className="">
-              <div className="size-12 rounded-full flex items-center justify-center bg-primary text-white">
+              <div className="flex size-12 items-center justify-center rounded-full bg-primary text-white">
                 <h1 className="text-lg font-bold">4</h1>
               </div>
             </div>
@@ -339,7 +340,7 @@ export const AgencyPreOnboardingMultiStep = () => {
           </div>
           <div className="flex items-center gap-4 ">
             <div className="">
-              <div className="size-12 rounded-full flex items-center justify-center bg-primary text-white">
+              <div className="flex size-12 items-center justify-center rounded-full bg-primary text-white">
                 <h1 className="text-lg font-bold">5</h1>
               </div>
             </div>
@@ -350,7 +351,7 @@ export const AgencyPreOnboardingMultiStep = () => {
               </p>{" "}
             </div>
           </div>
-          <div className="flex flex-col gap-2 mt-auto">
+          <div className="mt-auto flex flex-col gap-2">
             <h4 className="text-sm font-bold">Need Help?</h4>
             <p className="text-xs font-normal">
               Get to know how to setup your agency startup on Golobe
@@ -361,10 +362,10 @@ export const AgencyPreOnboardingMultiStep = () => {
         <ClientOnly>
           <Dialog open={openDialog} onOpenChange={setOpenDialog}>
             <DialogContent>
-              <Card className=" bg-white p-0 rounded-[10px] border-none bg-transparent outline-none focus-visible:ring-0 focus-visible:!ring-offset-0 shadow-none flex flex-col h-full  gap-8">
+              <Card className=" flex h-full flex-col gap-8 rounded-[10px] border-none bg-white p-0 shadow-none outline-none focus-visible:ring-0  focus-visible:!ring-offset-0">
                 <CardHeader className="p-0">
                   <CardTitle>
-                    <div className="flex justify-between items-center">
+                    <div className="flex items-center justify-between">
                       <h3 className="text-xl font-bold">Please Login</h3>
                       {/* <Button
               variant={"link"}
@@ -384,7 +385,7 @@ export const AgencyPreOnboardingMultiStep = () => {
                     </p>
                   </CardDescription>
                 </CardHeader>
-                <CardFooter className="p-0 flex items-center gap-4 justify-between">
+                <CardFooter className="flex items-center justify-between gap-4 p-0">
                   <Button
                     className="w-full"
                     variant={"outline"}

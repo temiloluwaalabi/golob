@@ -1,11 +1,9 @@
 import React from "react";
 
+import FlightsPage from "@/components/pages/flight-page";
+
 const RootFlightsPage = () => {
-  return (
-    <div>
-      <h3>Flight Page</h3>
-    </div>
-  );
+  return <FlightsPage />;
 };
 
 export default RootFlightsPage;
