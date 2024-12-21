@@ -1,8 +1,9 @@
+import { NextResponse } from "next/server";
+
 import { db } from "@/lib/db";
 import handleError from "@/lib/handlers/error";
 import { NotFoundError } from "@/lib/http-errors";
 import { UserSchema } from "@/lib/validations";
-import { NextResponse } from "next/server";
 
 // GET /API/USERS/ID
 export async function GET(
@@ -16,7 +17,7 @@ export async function GET(
   try {
     const user = await db.user.findFirst({
       where: {
-        id: id,
+        id,
       },
     });
 
@@ -39,7 +40,7 @@ export async function DELETE(
   try {
     const user = await db.user.delete({
       where: {
-        id: id,
+        id,
       },
     });
 
@@ -61,7 +62,7 @@ export async function PUT(
   try {
     const updatedUser = await db.user.update({
       where: {
-        id: id,
+        id,
       },
       data: {
         ...validatedData,

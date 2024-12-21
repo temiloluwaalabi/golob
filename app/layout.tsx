@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
-import { Inter, Montserrat } from "next/font/google";
 import "./globals.css";
-import { cn } from "@/lib/utils";
-import { montserrat, tradeGothic, tradeGothicExtended } from "./fonts";
-import { Footer } from "@/components/shared/footer/footer";
 import { SessionProvider } from "next-auth/react";
-import { auth } from "@/auth";
 import NextTopLoader from "nextjs-toploader";
-import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "sonner";
+
+import { auth } from "@/auth";
+import { Footer } from "@/components/shared/footer/footer";
+import { Toaster } from "@/components/ui/toaster";
 import { CurrentUserProvider } from "@/context/current-user-provider";
+import { cn } from "@/lib/utils";
+
+import { montserrat, tradeGothic, tradeGothicExtended } from "./fonts";
 
 export const metadata: Metadata = {
   title: "Golobe",

@@ -2,6 +2,8 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
+import { cn } from "@/lib/utils";
+
 interface LogoProps {
   className?: string;
   transparent?: boolean;
@@ -18,7 +20,7 @@ const Logo = ({ className, transparent }: LogoProps) => {
       width={111}
       height={36}
       alt="Logo"
-      className="object-cover cursor-pointer"
+      className={cn("cursor-pointer object-cover", className)}
       onClick={() => router.push("/")}
     />
   );

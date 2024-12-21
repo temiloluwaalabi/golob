@@ -1,25 +1,26 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { endsWith, isEmpty } from "lodash";
-import { useCallback, useState } from "react";
-import { generateClientDropzoneAccept } from "uploadthing/client";
-import { useToast } from "@/components/ui/use-toast";
-import { Button } from "@/components/ui/button";
+import { useDropzone } from "@uploadthing/react";
+import { generatePermittedFileTypes } from "@uploadthing/shared";
+import { isEmpty } from "lodash";
+import { X } from "lucide-react";
 import Image from "next/image";
+import { useCallback, useState } from "react";
 import { FileWithPath } from "react-dropzone";
+import { generateClientDropzoneAccept } from "uploadthing/client";
+import { UploadThingError } from "uploadthing/server";
 import { ClientUploadedFileData } from "uploadthing/types";
-import { CheckCheck, Trash, X } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 import { formatBytes, useUploadThing } from "@/lib/uploadthing";
 import { cn } from "@/lib/utils";
-import UploadIcon from "../icons/upload";
+
 import { ENDPOINTS } from "./upload-zone";
+import UploadIcon from "../icons/upload";
 import { Progress } from "../ui/progress";
-import { interval } from "date-fns";
-import { UploadThingError } from "uploadthing/server";
-import {
-  generatePermittedFileTypes,
-  SerializedUploadThingError,
-} from "@uploadthing/shared";
-import { useDropzone } from "@uploadthing/react";
+
 interface UploadZoneProps {
   label?: string;
   field?: any;
@@ -46,10 +47,10 @@ interface FileType {
   size: number;
   key: string;
 }
-interface CustomFile extends File {
-  status: "pending" | "uploading" | "success" | "error";
-  error?: Error;
-}
+// interface CustomFile extends File {
+//   status: "pending" | "uploading" | "success" | "error";
+//   error?: Error;
+// }
 const UploadZone = ({
   label,
   name,
@@ -70,15 +71,11 @@ const UploadZone = ({
   required,
 }: UploadZoneProps) => {
   const [files, setFiles] = useState<File[]>([]);
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [uploading, setIsUploading] = useState<boolean>(false);
+
   const [uploadProgress, setUploadProgress] = useState<{
     [key: string]: number; // Object to store progress for each file
   }>({});
-  const [uploadigError, setUploadingError] = useState<{
-    [key: string]: number; // Object to store progress for each file
-  }>({});
-  const [uploadError, setUploadError] = useState<Error | null>(null); // Error state
+
   const onDrop = useCallback(
     (acceptedFiles: FileWithPath[]) => {
       setFiles([
@@ -257,7 +254,7 @@ const UploadZone = ({
   return (
     <div className="flex flex-col gap-4">
       {label && (
-        <span className="mb-1.5 block font-semibold dark:text-light-500 text-gray-900">
+        <span className="mb-1.5 block font-semibold text-gray-900 dark:text-light-500">
           {label} {required && <span className="text-primary-500 ms-1">*</span>}
         </span>
       )}
@@ -269,8 +266,8 @@ const UploadZone = ({
         <div {...getRootProps()} className={cn("cursor-pointer")}>
           <div className="flex items-center gap-4">
             <input {...getInputProps()} />
-            <div className="size-8 rounded-full bg-gray-200 flex items-center justify-center">
-              <UploadIcon className="text-[#475367] size-4" />
+            <div className="flex size-8 items-center justify-center rounded-full bg-gray-200">
+              <UploadIcon className="size-4 text-[#475367]" />
             </div>
             <div>
               <h4 className="text-base font-bold">
@@ -339,7 +336,7 @@ const UploadZone = ({
               )}
               key={file.id || file.name}
             >
-              <div className="flex items-center space-x-4 w-full">
+              <div className="flex w-full items-center space-x-4">
                 <div>
                   {endpoint === ENDPOINTS.pdf ? (
                     <Image
@@ -353,7 +350,7 @@ const UploadZone = ({
                     <MediaPreview name={file.name} url={file.preview || ""} />
                   )}
                 </div>
-                <div className="space-y-1 w-full">
+                <div className="w-full space-y-1">
                   <span
                     className={cn(
                       "text-sm font-bold",
@@ -380,7 +377,7 @@ const UploadZone = ({
                 </div>
               </div>
               <Button
-                className="bg-primary-salmon hover:bg-primary-blackishGreen size-7"
+                className="size-7 bg-primary-salmon hover:bg-primary-blackishGreen"
                 size={"icon"}
                 onClick={() => handleRemoveFile(index)}
                 disabled={isUploading}
@@ -410,11 +407,11 @@ function UploadButtons({
   onUpload: () => void;
 }) {
   return (
-    <div className="flex w-full flex-wrap items-center h-full justify-center gap-2  pb-5 sm:flex-nowrap xl:w-auto xl:justify-end xl:px-0 xl:pb-0">
+    <div className="flex size-full flex-wrap items-center justify-center gap-2 pb-5  sm:flex-nowrap xl:w-auto xl:justify-end xl:px-0 xl:pb-0">
       <Button
         type="button"
         variant={"ghost"}
-        className=" bg-primary-salmon group text-white gap-2 rounded-md hover:bg-primary xl:w-auto"
+        className=" group gap-2 rounded-md bg-primary-salmon text-white hover:bg-primary xl:w-auto"
         disabled={isLoading}
         onClick={onUpload}
       >
@@ -447,16 +444,16 @@ export function MediaPreview({ name, url }: { name?: string; url: string }) {
   );
 }
 
-function MediaCaption({ name, size }: { name: string; size: number }) {
-  return (
-    <div className="mt-1 text-xs px-2 dark:bg-dark-300 py-1 rounded-md">
-      <p className="line-break font-medium text-gray-700 dark:text-light-500 ">
-        {name}
-      </p>
-      <p className="mt-1 font-mono">{size && formatBytes(size)}</p>
-    </div>
-  );
-}
+// function MediaCaption({ name, size }: { name: string; size: number }) {
+//   return (
+//     <div className="mt-1 rounded-md px-2 py-1 text-xs dark:bg-dark-300">
+//       <p className="line-break font-medium text-gray-700 dark:text-light-500 ">
+//         {name}
+//       </p>
+//       <p className="mt-1 font-mono">{size && formatBytes(size)}</p>
+//     </div>
+//   );
+// }
 
 export function LoadingSpinner() {
   return (

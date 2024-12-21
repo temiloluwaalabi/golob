@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 
+import { db } from "@/lib/db";
 import handleError from "@/lib/handlers/error";
 import { NotFoundError, ValidationError } from "@/lib/http-errors";
 import { AccountSchema } from "@/lib/validations";
-import { db } from "@/lib/db";
 
 // GET /api/users/[id]
 export async function GET(

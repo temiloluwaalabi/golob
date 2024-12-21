@@ -1,15 +1,14 @@
 "use server";
-import { LoginSchema, RegisterSchema } from "@/lib/validations";
-import * as z from "zod";
 import bcrypt from "bcryptjs";
+import { revalidatePath } from "next/cache";
+import { AuthError } from "next-auth";
+// import slugify from "slugify";
+import * as z from "zod";
+
+import { signIn, signOut } from "@/auth";
 import { getUserByEmail } from "@/data/user";
 import { db } from "@/lib/db";
-import { generateVerificationToken } from "@/lib/token";
-import { signIn, signOut } from "@/auth";
-import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
-import { AuthError } from "next-auth";
-import { revalidatePath } from "next/cache";
-import slugify from "slugify";
+import { LoginSchema, RegisterSchema } from "@/lib/validations";
 export const CreateUser = async (values: z.infer<typeof RegisterSchema>) => {
   const validatedFields = RegisterSchema.safeParse(values);
   if (!validatedFields.success) {
@@ -29,11 +28,11 @@ export const CreateUser = async (values: z.infer<typeof RegisterSchema>) => {
       error: `User with this email (${email}) already exists!`,
     };
   }
-  const slugifiedUsername = slugify(firstName, {
-    lower: true,
-    strict: true,
-    trim: true,
-  });
+  // const slugifiedUsername = slugify(firstName, {
+  //   lower: true,
+  //   strict: true,
+  //   trim: true,
+  // });
 
   const user = await db.user.create({
     data: {
@@ -41,7 +40,7 @@ export const CreateUser = async (values: z.infer<typeof RegisterSchema>) => {
       firstName,
       lastName,
       email,
-      username: slugifiedUsername,
+      // username: slugifiedUsername,
       hashedPassword,
       phoneNumber: number,
     },
@@ -202,18 +201,18 @@ export const Logout = async () => {
   await signOut();
 };
 
-export async function findOrCreateUser(googleUser: any) {
-  return await db.user.upsert({
-    where: { email: googleUser.email },
-    update: {
-      name: googleUser.name,
-      image: googleUser.picture,
-    },
-    create: {
-      email: googleUser.email,
-      name: googleUser.name,
-      image: googleUser.picture,
-      username: googleUser?.username,
-    },
-  });
-}
+// export async function findOrCreateUser(googleUser: any) {
+//   return await db.user.upsert({
+//     where: { email: googleUser.email },
+//     update: {
+//       name: googleUser.name,
+//       image: googleUser.picture,
+//     },
+//     create: {
+//       email: googleUser.email,
+//       name: googleUser.name,
+//       image: googleUser.picture,
+//       username: googleUser?.username,
+//     },
+//   });
+// }

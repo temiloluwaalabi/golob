@@ -1,40 +1,32 @@
-import LoginForm from "@/components/form/login-form";
-import CreditCardForm from "@/components/form/payment-method-form";
-import RegisterForm from "@/components/form/register-form";
-import AppleIcon from "@/components/icons/apple";
-import ArrowLeft from "@/components/icons/arrow-left";
-import EyeOffIcon from "@/components/icons/eye-off";
-import FacebookIcon from "@/components/icons/facebook";
-import GoogleIcon from "@/components/icons/google";
-import Logo from "@/components/shared/logo";
-import MaxWidthContainer from "@/components/shared/max-width-container";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import Link from "next/link";
+
+import CreditCardForm from "@/components/form/payment-method-form";
+import ArrowLeft from "@/components/icons/arrow-left";
+import Logo from "@/components/shared/logo";
+import MaxWidthContainer from "@/components/shared/max-width-container";
 
 const PaymentMethod = () => {
   return (
     <MaxWidthContainer className="h-full lg:h-screen">
       <div className="grid w-full grid-cols-12 gap-8">
-        <div className=" h-full w-full justify-end items-end  col-span-12 hidden lg:flex lg:col-span-5">
+        <div className=" col-span-12 hidden size-full items-end  justify-end lg:col-span-5 lg:flex">
           <Image
             src={
               "https://res.cloudinary.com/demw7uh0v/image/upload/v1720258605/golobe/6081538_qso39y.jpg"
             }
-            className="object-cover rounded-[30px] h-full w-full"
+            className="size-full rounded-[30px] object-cover"
             width={616}
             height={816}
             alt="register image"
           />
         </div>
-        <div className="flex flex-col gap-20 w-full h-full col-span-12 lg:col-span-7 lg:px-20">
+        <div className="col-span-12 flex size-full flex-col gap-20 lg:col-span-7 lg:px-20">
           <Logo />
           <div className="flex flex-col gap-4">
-            <div className="space-y-4 mb-10">
+            <div className="mb-10 space-y-4">
               <Link
-                className="flex items-center gap-2 cursor-pointer"
+                className="flex cursor-pointer items-center gap-2"
                 href="/auth/login"
               >
                 <ArrowLeft />

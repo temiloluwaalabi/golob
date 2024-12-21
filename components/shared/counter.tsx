@@ -1,7 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { Minus, Plus } from "lucide-react";
 import React, { useCallback } from "react";
+
 import { Button } from "../ui/button";
 
 interface CounterProps {
@@ -48,7 +51,7 @@ const Counter: React.FC<CounterProps> = ({
     <div className="flex flex-row items-center  justify-between">
       <div className="flex flex-col">
         <div className="font-medium">{title}</div>
-        <div className="text-light-500 dark:text-light-300/40 text-xs font-light">
+        <div className="text-xs font-light text-light-500 dark:text-light-300/40">
           {subtitle}
         </div>
       </div>
@@ -59,12 +62,12 @@ const Counter: React.FC<CounterProps> = ({
           // disabled={totalPassengers < 2 || disabled}
           variant={"ghost"}
           size={"icon"}
-          className="dark:border-light-500 dark:text-light-700 dark:hover:bg-light-500 flex size-6 cursor-pointer items-center justify-center rounded-full border border-neutral-400 text-neutral-600 transition hover:opacity-80 disabled:cursor-not-allowed"
+          className="flex size-6 cursor-pointer items-center justify-center rounded-full border border-neutral-400 text-neutral-600 transition hover:opacity-80 disabled:cursor-not-allowed dark:border-light-500 dark:text-light-700 dark:hover:bg-light-500"
           onClick={onReduce}
         >
           <Minus size={15} />
         </Button>
-        <div className="dark:text-light-700 text-lg font-light text-neutral-600">
+        <div className="text-lg font-light text-neutral-600 dark:text-light-700">
           {value}
         </div>
         <Button
@@ -73,7 +76,7 @@ const Counter: React.FC<CounterProps> = ({
           variant={"ghost"}
           size={"icon"}
           onClick={onAdd}
-          className="dark:border-light-500 dark:text-light-700 dark:hover:bg-light-500 flex size-6 cursor-pointer items-center justify-center rounded-full border border-neutral-400 text-neutral-600 transition hover:opacity-80"
+          className="flex size-6 cursor-pointer items-center justify-center rounded-full border border-neutral-400 text-neutral-600 transition hover:opacity-80 dark:border-light-500 dark:text-light-700 dark:hover:bg-light-500"
         >
           <Plus size={15} />
         </Button>

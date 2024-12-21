@@ -1,6 +1,7 @@
 // @flow
-import { cn } from "@/lib/utils";
 import * as React from "react";
+
+import { cn } from "@/lib/utils";
 type Props = {
   boxClassName?: string;
   overlayClassName?: string;

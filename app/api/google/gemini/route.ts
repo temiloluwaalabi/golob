@@ -111,6 +111,7 @@ export async function POST(req: NextRequest) {
       text: response,
     });
   } catch (error) {
+    console.error(error);
     return NextResponse.json({
       text: "Unable to process the prompt. Please try again",
     });

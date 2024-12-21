@@ -1,37 +1,38 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // @flow
 "use client";
-import AirplaceIcon from "@/components/icons/airplane";
-import StayIcon from "@/components/icons/stay";
-import Link from "next/link";
-import * as React from "react";
-import Logo from "../logo";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { usePathname, useRouter } from "next/navigation";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ChevronRight, Menu } from "lucide-react";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
+import * as React from "react";
+
+import AirplaceIcon from "@/components/icons/airplane";
+import FaviconArrowDown from "@/components/icons/favicon-arrow";
+import FavoriteIcon from "@/components/icons/favorite";
+import LogoutIcon from "@/components/icons/logout";
+import StayIcon from "@/components/icons/stay";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import FaviconArrowDown from "@/components/icons/favicon-arrow";
-import { authRoutes } from "@/routes";
-import { authMenuRoutes } from "@/config/routes";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import LogoutIcon from "@/components/icons/logout";
-import FavoriteIcon from "@/components/icons/favorite";
 import { Separator } from "@/components/ui/separator";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { authMenuRoutes } from "@/config/routes";
+import { cn } from "@/lib/utils";
 import { User } from "@/types";
+
+import Logo from "../logo";
 type Props = {
   className?: string;
   transparent?: boolean;
@@ -41,7 +42,6 @@ export const NavHeader = (props: Props) => {
   const [openAuthMenu, setOpenAuthMenu] = React.useState(false);
   const [openMobileAuthMenu, setOpenMobileAuthMenu] = React.useState(false);
   const [openIndex, setOpenIndex] = React.useState<number | null>(null);
-  const [open, setOpen] = React.useState(false);
   const handleOpenChange = (index: number, open: boolean) => {
     setOpenIndex(open ? index : null);
   };
@@ -80,7 +80,7 @@ export const NavHeader = (props: Props) => {
         props.transparent !== true && "shadow-md"
       )}
     >
-      <div className=" items-center h-full gap-[32px] hidden lg:flex">
+      <div className=" hidden h-full items-center gap-[32px] lg:flex">
         {routes.map((route, id) => {
           const isActive =
             (pathname.includes(route.route) && route.route.length > 1) ||
@@ -107,7 +107,7 @@ export const NavHeader = (props: Props) => {
         <Logo transparent={props.transparent} />
       </div>
       <div>
-        <div className=" items-center gap-8 hidden lg:flex">
+        <div className=" hidden items-center gap-8 lg:flex">
           {props.user?.id ? (
             <DropdownMenu open={openAuthMenu} onOpenChange={setOpenAuthMenu}>
               <div className="flex items-center gap-2">
@@ -162,8 +162,8 @@ export const NavHeader = (props: Props) => {
                 sideOffset={5}
                 className="w-[329px] rounded-xl p-8"
               >
-                <Card className="shadow-none outline-none border-none p-0">
-                  <CardHeader className="p-0 !flex flex-row items-center gap-4">
+                <Card className="border-none p-0 shadow-none outline-none">
+                  <CardHeader className="!flex flex-row items-center gap-4 p-0">
                     <div className="">
                       <Avatar
                         className={cn(
@@ -181,7 +181,7 @@ export const NavHeader = (props: Props) => {
                     </div>
 
                     <div className="space-y-1">
-                      <h2 className="font-mont font-semibold text-base">
+                      <h2 className="font-mont text-base font-semibold">
                         {props.user.name}
                       </h2>
                       <p className="font-mont text-sm font-normal">Online</p>
@@ -221,7 +221,7 @@ export const NavHeader = (props: Props) => {
                                     isActive && "text-primary "
                                   )}
                                 >
-                                  <div className="flex gap-2 items-center">
+                                  <div className="flex items-center gap-2">
                                     <>{route.icon}</>
                                     <Link
                                       href={route.href}
@@ -300,7 +300,7 @@ export const NavHeader = (props: Props) => {
                                     isActive && "text-primary "
                                   )}
                                 >
-                                  <div className="flex gap-2 items-center">
+                                  <div className="flex items-center gap-2">
                                     <>{route.icon}</>
                                     <Link
                                       href={route.href}
@@ -349,7 +349,7 @@ export const NavHeader = (props: Props) => {
                     <Button
                       variant={"ghost"}
                       onClick={handleSignOut}
-                      className="p-0 w-full hover:bg-red-600 hover:text-white hover:px-2 flex items-center justify-start"
+                      className="flex w-full items-center justify-start p-0 hover:bg-red-600 hover:px-2 hover:text-white"
                     >
                       <LogoutIcon className="mr-2 size-4" />
                       Logout
@@ -380,7 +380,7 @@ export const NavHeader = (props: Props) => {
           )}
         </div>
         <Sheet>
-          <div className="flex gap-2 items-center flex-row-reverse">
+          <div className="flex flex-row-reverse items-center gap-2">
             <SheetTrigger asChild>
               <Menu
                 className={cn(
@@ -396,7 +396,7 @@ export const NavHeader = (props: Props) => {
               >
                 <DropdownMenuTrigger
                   asChild
-                  className="cursor-pointer flex lg:hidden"
+                  className="flex cursor-pointer lg:hidden"
                 >
                   <div className="relative">
                     <Avatar
@@ -425,8 +425,8 @@ export const NavHeader = (props: Props) => {
                   sideOffset={5}
                   className="w-[329px] rounded-xl p-8"
                 >
-                  <Card className="shadow-none outline-none border-none p-0">
-                    <CardHeader className="p-0 !flex flex-row items-center gap-4">
+                  <Card className="border-none p-0 shadow-none outline-none">
+                    <CardHeader className="!flex flex-row items-center gap-4 p-0">
                       <div className="">
                         <Avatar
                           className={cn(
@@ -444,7 +444,7 @@ export const NavHeader = (props: Props) => {
                       </div>
 
                       <div className="space-y-1">
-                        <h2 className="font-mont font-semibold text-base">
+                        <h2 className="font-mont text-base font-semibold">
                           {props.user.name}
                         </h2>
                         <p className="font-mont text-sm font-normal">Online</p>
@@ -484,7 +484,7 @@ export const NavHeader = (props: Props) => {
                                       isActive && "text-primary "
                                     )}
                                   >
-                                    <div className="flex gap-2 items-center">
+                                    <div className="flex items-center gap-2">
                                       <>{route.icon}</>
                                       <Link
                                         href={route.href}
@@ -563,7 +563,7 @@ export const NavHeader = (props: Props) => {
                                       isActive && "text-primary "
                                     )}
                                   >
-                                    <div className="flex gap-2 items-center">
+                                    <div className="flex items-center gap-2">
                                       <>{route.icon}</>
                                       <Link
                                         href={route.href}
@@ -612,7 +612,7 @@ export const NavHeader = (props: Props) => {
                       <Button
                         variant={"ghost"}
                         onClick={handleSignOut}
-                        className="p-0 w-full hover:bg-red-600 hover:text-white hover:px-2 flex items-center justify-start"
+                        className="flex w-full items-center justify-start p-0 hover:bg-red-600 hover:px-2 hover:text-white"
                       >
                         <LogoutIcon className="mr-2 size-4" />
                         Logout
@@ -680,7 +680,7 @@ export const NavHeader = (props: Props) => {
                   })}
                 </div>
               ) : (
-                <div className="gap-3 mt-4 flex items-center justify-end flex-row-reverse">
+                <div className="mt-4 flex flex-row-reverse items-center justify-end gap-3">
                   <Button variant={"link"} asChild className={cn("")}>
                     <Link href="/auth/login">Login</Link>
                   </Button>

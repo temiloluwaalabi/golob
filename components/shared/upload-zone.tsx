@@ -1,22 +1,27 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-unused-vars */
 "use client";
+import { useDropzone } from "@uploadthing/react";
+import { isEmpty } from "lodash";
+import { Loader2, X } from "lucide-react";
+import Image from "next/image";
 import React, { useCallback, useState } from "react";
 import { FileWithPath } from "react-dropzone";
-import { isEmpty, size } from "lodash";
+import { toast } from "sonner";
 import {
   generateClientDropzoneAccept,
   generatePermittedFileTypes,
 } from "uploadthing/client";
-import { formatBytes, useUploadThing } from "@/lib/uploadthing";
 import { ClientUploadedFileData } from "uploadthing/types";
-import { toast } from "sonner";
-import { Progress } from "../ui/progress";
-import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
-import { Button } from "../ui/button";
-import UploadIcon from "../icons/upload";
+
+import { formatBytes, useUploadThing } from "@/lib/uploadthing";
 import { cn } from "@/lib/utils";
-import { Loader, Loader2, Trash, X } from "lucide-react";
-import Image from "next/image";
-import { useDropzone } from "@uploadthing/react";
+
+import UploadIcon from "../icons/upload";
+import { Button } from "../ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
+import { Progress } from "../ui/progress";
 
 export interface FileType extends File {
   preview?: string;
@@ -53,14 +58,13 @@ type Props = {
 export const UploadZone = (props: Props) => {
   const [files, setFiles] = useState<FileType[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<FileType[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [isDialogOpen, setDialogOpen] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState<{
-    [key: string]: number;
-  }>({});
-  const [uploadErrors, setUploadErrors] = useState<{ [key: string]: string }>(
-    {}
-  );
+  // const [uploadProgress, setUploadProgress] = useState<{
+  //   [key: string]: number;
+  // }>({});
+  // const [uploadErrors, setUploadErrors] = useState<{ [key: string]: string }>(
+  //   {}
+  // );
   const onDrop = useCallback((acceptedFiles: FileWithPath[]) => {
     const newFiles = acceptedFiles.map((file) => ({
       ...file,
@@ -68,7 +72,7 @@ export const UploadZone = (props: Props) => {
       size: file.size,
       preview: URL.createObjectURL(file),
       progress: 0,
-      status: "uploading" as "uploading",
+      status: "uploading" as const,
       id: `${file.name}-${file.size}-${Date.now()}`,
     }));
     setFiles((prevFiles) => [...prevFiles, ...newFiles]);
@@ -218,7 +222,7 @@ export const UploadZone = (props: Props) => {
 
     return (
       <div className="flex items-center space-x-2" key={file.id}>
-        <div className="flex-1 relative">
+        <div className="relative flex-1">
           <span className="block text-gray-600">{file.name}</span>
           <div className="progress-bar">
             <div
@@ -247,7 +251,7 @@ export const UploadZone = (props: Props) => {
       case "uploading":
         return (
           <div
-            className="flex items-center justify-between border border-dashed space-x-2 p-4 rounded-[10px]"
+            className="flex items-center justify-between space-x-2 rounded-[10px] border border-dashed p-4"
             key={file.id}
           >
             <div className="flex items-center space-x-4">
@@ -277,7 +281,7 @@ export const UploadZone = (props: Props) => {
               </div>
             </div>
             <Button
-              className="bg-primary-salmon hover:bg-primary-blackishGreen size-7"
+              className="size-7 bg-primary-salmon hover:bg-primary-blackishGreen"
               size={"icon"}
               disabled={isUploading}
             >
@@ -292,7 +296,7 @@ export const UploadZone = (props: Props) => {
 
       case "success":
         return (
-          <div className="bg-green-100 flex items-center justify-between border border-dashed space-x-2 p-4 rounded-[10px]">
+          <div className="flex items-center justify-between space-x-2 rounded-[10px] border border-dashed bg-green-100 p-4">
             <div className="flex items-center space-x-4">
               <div>
                 {props.endpoint === ENDPOINTS.pdf ? (
@@ -322,7 +326,7 @@ export const UploadZone = (props: Props) => {
               </div>
             </div>
             <Button
-              className="bg-primary-salmon hover:bg-primary-blackishGreen size-7"
+              className="size-7 bg-primary-salmon hover:bg-primary-blackishGreen"
               size={"icon"}
               disabled={isUploading}
             >
@@ -337,7 +341,7 @@ export const UploadZone = (props: Props) => {
 
       case "error":
         return (
-          <div className="bg-pink-100 flex items-center justify-between border border-dashed space-x-2 p-4 rounded-[10px]">
+          <div className="flex items-center justify-between space-x-2 rounded-[10px] border border-dashed bg-pink-100 p-4">
             <div className="flex items-center space-x-4">
               <div>
                 {props.endpoint === ENDPOINTS.pdf ? (
@@ -356,7 +360,7 @@ export const UploadZone = (props: Props) => {
               </div>
 
               <div className="space-y-1">
-                <span className="text-sm text-pink-600 font-bold">
+                <span className="text-sm font-bold text-pink-600">
                   Upload Failed! Please try again
                 </span>
                 <Progress
@@ -375,7 +379,7 @@ export const UploadZone = (props: Props) => {
               variant={"ghost"}
               disabled={isUploading}
             >
-              <Loader2 className="size-4 me-2" />
+              <Loader2 className="me-2 size-4" />
               Reupload
             </Button>
 
@@ -396,7 +400,7 @@ export const UploadZone = (props: Props) => {
           <div className="border border-dashed">
             <div>
               <div className="size-8 rounded-full bg-[#F9FAFB]">
-                <UploadIcon className="text-[#475367] size-4" />
+                <UploadIcon className="size-4 text-[#475367]" />
               </div>
               <div>
                 <h4 className="text-base font-bold">Tap to Upload</h4>
@@ -415,7 +419,7 @@ export const UploadZone = (props: Props) => {
             <div className="border border-dashed">
               <div className="flex flex-col">
                 <div className="size-8 rounded-full bg-[#F9FAFB]">
-                  <UploadIcon className="text-[#475367] size-4" />
+                  <UploadIcon className="size-4 text-[#475367]" />
                 </div>
                 <div className="flex flex-col">
                   <h4 className="text-base font-bold">Tap to Upload</h4>
@@ -433,7 +437,7 @@ export const UploadZone = (props: Props) => {
       {!props.isDialog && (
         <div>
           {props.label && (
-            <span className="dark:text-light-500 mb-1.5 block font-semibold text-gray-900">
+            <span className="mb-1.5 block font-semibold text-gray-900 dark:text-light-500">
               {props.label}{" "}
               {props.required && (
                 <span className="text-primary-500 ms-1">*</span>
@@ -448,8 +452,8 @@ export const UploadZone = (props: Props) => {
             <div {...getRootProps()} className={cn("cursor-pointer")}>
               <div className="flex items-center gap-4">
                 <input {...getInputProps()} />
-                <div className="size-8 rounded-full bg-gray-200 flex items-center justify-center">
-                  <UploadIcon className="text-[#475367] size-4" />
+                <div className="flex size-8 items-center justify-center rounded-full bg-gray-200">
+                  <UploadIcon className="size-4 text-[#475367]" />
                 </div>
                 <div>
                   <h4 className="text-base font-bold">
@@ -531,7 +535,7 @@ function UploadButtons({
       <Button
         type="button"
         variant={"ghost"}
-        className=" bg-primary-salmon group text-white gap-2 rounded-md hover:bg-primary xl:w-auto"
+        className=" group gap-2 rounded-md bg-primary-salmon text-white hover:bg-primary xl:w-auto"
         disabled={isLoading}
         onClick={onUpload}
       >
@@ -565,8 +569,8 @@ export const MediaPreview = ({ name, url }: { name?: string; url: string }) => {
 };
 function MediaCaption({ name, size }: { name: string; size: number }) {
   return (
-    <div className="dark:bg-dark-300 mt-1 rounded-md px-2 py-1 text-xs">
-      <p className="line-break dark:text-light-500 font-medium text-gray-700 ">
+    <div className="mt-1 rounded-md px-2 py-1 text-xs dark:bg-dark-300">
+      <p className="line-break font-medium text-gray-700 dark:text-light-500 ">
         {name}
       </p>
       <p className="mt-1 font-mono">{size && formatBytes(size)}</p>

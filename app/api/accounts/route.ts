@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
+import { db } from "@/lib/db";
 import handleError from "@/lib/handlers/error";
 import { ForbiddenError } from "@/lib/http-errors";
-import { db } from "@/lib/db";
 import { AccountSchema } from "@/lib/validations";
 
 export async function GET() {

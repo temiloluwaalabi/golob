@@ -1,15 +1,16 @@
+import { NextResponse } from "next/server";
+// import slugify from "slugify";
+
 import { db } from "@/lib/db";
 import handleError from "@/lib/handlers/error";
 import { ValidationError } from "@/lib/http-errors";
 import { SignInWithOAuthSchema } from "@/lib/validations";
-import { NextResponse } from "next/server";
-import slugify from "slugify";
 
 export async function POST(request: Request) {
   try {
     const { provider, providerAccountId, user } = await request.json();
 
-    await db.$transaction(async (prisma) => {
+    await db.$transaction(async () => {
       const validatedData = SignInWithOAuthSchema.safeParse({
         provider,
         providerAccountId,
@@ -20,13 +21,13 @@ export async function POST(request: Request) {
         throw new ValidationError(validatedData.error.flatten().fieldErrors);
       }
 
-      const { name, email, image, username } = user;
+      const { name, email, image } = user;
 
-      const slugifiedUsername = slugify(username, {
-        lower: true,
-        strict: true,
-        trim: true,
-      });
+      // const slugifiedUsername = slugify(username, {
+      //   lower: true,
+      //   strict: true,
+      //   trim: true,
+      // });
 
       // find existing user
       let existingUser = await db.user.findUnique({

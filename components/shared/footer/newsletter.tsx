@@ -1,16 +1,17 @@
 // @flow
 "use client";
-import * as React from "react";
-import * as z from "zod";
-import { useForm } from "react-hook-form";
-import { EmailSchema } from "@/lib/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form, FormField, FormItem } from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import Image from "next/image";
-type Props = {};
-export const NewsLetter = (props: Props) => {
+import * as React from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+
+import { Button } from "@/components/ui/button";
+import { Form, FormField, FormItem } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { EmailSchema } from "@/lib/validations";
+
+export const NewsLetter = () => {
   const form = useForm<z.infer<typeof EmailSchema>>({
     resolver: zodResolver(EmailSchema),
   });
@@ -19,17 +20,17 @@ export const NewsLetter = (props: Props) => {
     console.log(values);
   };
   return (
-    <div className="flex items-center flex-col md:flex-row justify-between px-[24px] shadow-md rounded-[20px] bg-[#CDEAE1]">
-      <div className="py-[24px] flex flex-col gap-[10px] md:gap-[16px] lg:gap-[24px]">
-        <h4 className="font-gothic text-2xl md:text-3xl lg:text-5xl font-bold text-primary-blackishGreen">
+    <div className="flex flex-col items-center justify-between rounded-[20px] bg-[#CDEAE1] px-[24px] shadow-md md:flex-row">
+      <div className="flex flex-col gap-[10px] py-[24px] md:gap-[16px] lg:gap-[24px]">
+        <h4 className="font-gothic text-2xl font-bold text-primary-blackishGreen md:text-3xl lg:text-5xl">
           Subscribe <br /> Newsletter
         </h4>
         <div className="flex flex-col gap-3 ">
           <div className="flex flex-col gap-2">
-            <h4 className="font-gothic text-[20px] leading-[25px] font-bold text-primary-blackishGreen opacity-80">
+            <h4 className="font-gothic text-[20px] font-bold leading-[25px] text-primary-blackishGreen opacity-80">
               The Travel
             </h4>
-            <p className="font-mont font-medium text-base text-primary-blackishGreen max-w-[593px] opacity-70">
+            <p className="max-w-[593px] font-mont text-base font-medium text-primary-blackishGreen opacity-70">
               Get inspired! Receive travel discounts, tips and behind the scenes
               stories.
             </p>
@@ -41,16 +42,16 @@ export const NewsLetter = (props: Props) => {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem className="w-full">
-                    <div className="flex w-full flex-col md:flex-row items-start  md:items-center gap-2">
+                    <div className="flex w-full flex-col items-start gap-2  md:flex-row md:items-center">
                       <Input
-                        className="py-2 px-4 flex w-full h-[40px] md:h-[56px] rounded-[4px] outline-none border-none bg-white font-mono font-normal text-sm text-[#1c1b1f]"
+                        className="flex h-[40px] w-full rounded-[4px] border-none bg-white px-4 py-2 font-mono text-sm font-normal text-[#1c1b1f] outline-none md:h-[56px]"
                         type="email"
                         placeholder="Your email address"
                         {...field}
                       />
                       <Button
                         type="submit"
-                        className="flex items-center justify-center w-[104px] h-[40px] md:h-[56px] gap-1 py-2 px-4 bg-primary-blackishGreen rounded-[4px] font-mont text-sm text-white"
+                        className="flex h-[40px] w-[104px] items-center justify-center gap-1 rounded-[4px] bg-primary-blackishGreen px-4 py-2 font-mont text-sm text-white md:h-[56px]"
                       >
                         Subscribe
                       </Button>
@@ -68,7 +69,7 @@ export const NewsLetter = (props: Props) => {
           alt="Newsletter image"
           width={400}
           height={305}
-          className="w-[400px] h-[305px] object-cover hidden md:flex"
+          className="hidden h-[305px] w-[400px] object-cover md:flex"
         />
       </div>
     </div>

@@ -1,6 +1,7 @@
-import React from "react";
-import { Button } from "../ui/button";
 import { ChevronLeft } from "lucide-react";
+import React from "react";
+
+import { Button } from "../ui/button";
 
 interface ProgressBarWithButtonsProps {
   currentStep: number;
@@ -19,19 +20,19 @@ const ProgressBarWithButtons = ({
 }: ProgressBarWithButtonsProps) => {
   const steps = Array.from({ length: totalSteps }, (_, i) => i + 1); // Create an array of steps
   return (
-    <div className="flex flex-col mt-4 items-center justify-between mb-8 w-full">
+    <div className="mb-8 mt-4 flex w-full flex-col items-center justify-between">
       {/* Buttons */}
-      <div className="flex items-center gap-4 justify-between w-full mt-4">
+      <div className="mt-4 flex w-full items-center justify-between gap-4">
         <Button onClick={onBack} disabled={currentStep === 0} variant={"ghost"}>
-          <ChevronLeft className="size-4 me-2" />
+          <ChevronLeft className="me-2 size-4" />
           Back
         </Button>
-        <div className="flex items-center w-fit gap-2">
+        <div className="flex w-fit items-center gap-2">
           {steps.map((step) => (
             <div
               key={step}
               className={`
-            h-[8px] rounded-full flex-1 w-[38px] transition-all duration-500 ease-in-out 
+            h-[8px] w-[38px] flex-1 rounded-full transition-all duration-500 ease-in-out 
             ${
               step <= currentStep
                 ? "bg-primary"

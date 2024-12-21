@@ -39,7 +39,7 @@ export const getAllAirports = async () => {
       return {
         name: country,
         code: countryAirports[0]?.countryCode, // Assuming all airports in the same country have the same code
-        states: states,
+        states,
         airports: countryAirports.map((airport) => ({
           name: airport.name,
           code: airport.iata, // Replace with actual airport code field
@@ -50,7 +50,7 @@ export const getAllAirports = async () => {
 
     return {
       name: continent,
-      countries: countries,
+      countries,
     };
   });
 
@@ -102,6 +102,6 @@ export const getAllDBAirports = async () => {
 
   return {
     success: "Airports fecthed",
-    airports: airports,
+    airports,
   };
 };

@@ -1,14 +1,10 @@
 "use server";
-import { auth } from "@/auth";
-import { currentUser } from "@/lib/auth";
-import { db } from "@/lib/db";
-import {
-  GeneralPreOnboardingSchema,
-  LoginSchema,
-  RegisterSchema,
-} from "@/lib/validations";
 import { KycDocumentType } from "@prisma/client";
 import * as z from "zod";
+
+import { currentUser } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { GeneralPreOnboardingSchema } from "@/lib/validations";
 
 export const PreAgencyOnboardingAction = async (
   values: z.infer<typeof GeneralPreOnboardingSchema>
@@ -30,7 +26,6 @@ export const PreAgencyOnboardingAction = async (
     }
 
     const {
-      country,
       identificationNumber,
       identificationType,
       addressLineOne,

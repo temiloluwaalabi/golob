@@ -1,11 +1,10 @@
-import { api } from "@/lib/api";
+import { NextRequest, NextResponse } from "next/server";
+
 import { db } from "@/lib/db";
 import handleError from "@/lib/handlers/error";
 import { ForbiddenError, NotFoundError } from "@/lib/http-errors";
 import { IAirport } from "@/types";
-import { Location } from "@prisma/client";
 
-import { NextRequest, NextResponse } from "next/server";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API || "http://localhost:3001/api";
 
 const API_URL =

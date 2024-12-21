@@ -25,11 +25,11 @@ const HorizontalStepper = ({
   const steps = Array.from({ length: totalSteps }, (_, i) => i + 1);
 
   return (
-    <div className="flex items-center mb-8">
+    <div className="mb-8 flex items-center">
       {steps.map((step) => (
-        <div key={step} className="relative w-full flex items-center">
+        <div key={step} className="relative flex w-full items-center">
           <div
-            className={`size-8 rounded-full z-20 flex items-center justify-center font-bold transition-colors duration-300 ${
+            className={`z-20 flex size-8 items-center justify-center rounded-full font-bold transition-colors duration-300 ${
               step <= currentStep
                 ? "bg-primary text-white"
                 : step === currentStep + 1
@@ -44,7 +44,7 @@ const HorizontalStepper = ({
 
           {step < totalSteps && (
             <div
-              className={`absolute top-1/2 -translate-y-1/2 z-10 transition-all duration-300 ease-in-out   w-full h-px   ${
+              className={`absolute top-1/2 z-10 h-px w-full -translate-y-1/2 transition-all   duration-300 ease-in-out   ${
                 step <= currentStep
                   ? "bg-primary"
                   : step === currentStep + 1

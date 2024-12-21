@@ -1,11 +1,11 @@
+import bcrypt from "bcryptjs";
+import { NextResponse } from "next/server";
+
 import { getUserByEmail } from "@/data/user";
 import { db } from "@/lib/db";
-import bcrypt from "bcryptjs";
-
 import handleError from "@/lib/handlers/error";
 import { ValidationError } from "@/lib/http-errors";
 import { RegisterSchema } from "@/lib/validations";
-import { NextResponse } from "next/server";
 
 export async function GET() {
   try {

@@ -1,16 +1,16 @@
 "use client";
 // @flow
+import { useSearchParams } from "next/navigation";
+import { signIn } from "next-auth/react";
 import * as React from "react";
+
+import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
+
+import AppleIcon from "../icons/apple";
 import FacebookIcon from "../icons/facebook";
 import GoogleIcon from "../icons/google";
-import AppleIcon from "../icons/apple";
-import { signIn } from "next-auth/react";
-
-import { useSearchParams } from "next/navigation";
-import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
 import { Button } from "../ui/button";
-type Props = {};
-export const SocialLogin = (props: Props) => {
+export const SocialLogin = () => {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl");
 
@@ -20,24 +20,24 @@ export const SocialLogin = (props: Props) => {
     });
   };
   return (
-    <div className="flex items-center gap-4 w-full justify-between">
+    <div className="flex w-full items-center justify-between gap-4">
       <Button
         variant={"outline"}
         type="button"
-        className="border rounded-md cursor-pointer border-primary w-full flex items-center justify-center py-6 px-6"
+        className="flex w-full cursor-pointer items-center justify-center rounded-md border border-primary p-6"
       >
         <FacebookIcon />
       </Button>
       <Button
         variant={"outline"}
         onClick={() => onClick("google")}
-        className="border rounded-md cursor-pointer border-primary w-full flex items-center justify-center py-6 px-6"
+        className="flex w-full cursor-pointer items-center justify-center rounded-md border border-primary p-6"
       >
         <GoogleIcon />
       </Button>
       <Button
         variant={"outline"}
-        className="border rounded-md cursor-pointer border-primary w-full flex items-center justify-center py-6 px-6"
+        className="flex w-full cursor-pointer items-center justify-center rounded-md border border-primary p-6"
       >
         <AppleIcon />
       </Button>

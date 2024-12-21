@@ -1,7 +1,8 @@
+import { NextRequest, NextResponse } from "next/server";
+
 import { db } from "@/lib/db";
 import handleError from "@/lib/handlers/error";
 import { ForbiddenError, NotFoundError } from "@/lib/http-errors";
-import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   const { url } = request;
